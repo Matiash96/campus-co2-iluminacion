@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cálculo · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="calculo" data-title="Cálculo de emisiones y trazabilidad">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="section-heading">
+      <div><h2>Módulo de cálculo</h2><p>Aplica el factor de emisión del período, convierte unidades y envía cada resultado con su trazabilidad a <code>POST /resultados-emisiones</code>.</p></div>
+      <div class="toolbar">
+        <label class="field">Período<select id="periodo"></select></label>
+        <label class="field">Edificio<select id="edificio"></select></label>
+        <label class="field">Mostrar en<select id="unidad"><option value="kg">kgCO₂e</option><option value="t">tCO₂e</option></select></label>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <article class="panel">
+        <span class="kpi-label">Factor de emisión aplicado</span>
+        <div id="factor-box" class="loading">Cargando…</div>
+      </article>
+      <article class="panel">
+        <span class="kpi-label">Estado del período</span>
+        <div id="estado-box" class="loading">Cargando…</div>
+      </article>
+      <article class="panel">
+        <span class="kpi-label">Fórmula (Alcance 2, basado en ubicación)</span>
+        <div class="formula" style="margin-bottom:0">E = Σ (n × P<sub>W</sub> ÷ 1000 × h<sub>año</sub> × s) × FE</div>
+        <small class="required-note">n: cantidad · P: potencia unitaria · h: horas/año · s: simultaneidad · FE: kgCO₂e/kWh</small>
+      </article>
+    </div>
+
+    <article class="panel mt">
+      <div class="panel-head">
+        <div><h3>Datos de actividad del período</h3><p>Seleccioná una fila para ver el detalle del cálculo.</p></div>
+        <div class="row-actions">
+          <button class="btn btn-primary" id="btn-all" disabled>Calcular y enviar pendientes</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Edificio / sector</th><th>Tipo</th><th class="num">Consumo</th><th class="num">Emisiones</th><th>Último cálculo</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="calc-table"><tr><td colspan="8" class="empty">Cargando…</td></tr></tbody>
+          <tfoot id="calc-foot"></tfoot>
+        </table>
+      </div>
+      <p id="calc-message" class="form-message" aria-live="polite"></p>
+    </article>
+
+    <article class="panel mt" id="trace-panel">
+      <div class="panel-head"><div><h3>Trazabilidad del resultado</h3><p id="trace-sub">Elegí un dato de actividad en la tabla.</p></div></div>
+      <div id="trace" class="trace"></div>
+    </article>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/contexto.js"></script>
+  <script src="js/pages/calculo.js"></script>
+</body>
+</html>

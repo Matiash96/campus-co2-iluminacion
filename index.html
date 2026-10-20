@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inicio · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="inicio" data-title="Resumen de iluminación por edificio">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow light">Dimensión 4 · Infraestructura y edificios</div>
+        <h2>Medí la iluminación.<br>Reducí el impacto.</h2>
+        <p>Módulo frontend para relevar las luminarias de cada edificio de la UTN FRC, calcular sus emisiones de Alcance 2 con el factor de la red eléctrica argentina y evaluar el recambio a LED.</p>
+        <a class="btn btn-light" href="carga.html">Cargar relevamiento <span>→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="building building-a"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="building building-b"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <div><h2>Vista general</h2><p>Indicadores del último período con datos, obtenidos desde la API.</p></div>
+      <span class="period-tag" id="home-period">Cargando…</span>
+    </div>
+    <div class="kpi-grid" id="home-kpis">
+      <article class="kpi"><div class="kpi-icon green">◉</div><span class="kpi-label">Emisiones calculadas</span><strong id="k-co2">–</strong><small>Alcance 2 · iluminación</small></article>
+      <article class="kpi"><div class="kpi-icon gold">ϟ</div><span class="kpi-label">Consumo anual estimado</span><strong id="k-kwh">–</strong><small>Suma de todos los edificios</small></article>
+      <article class="kpi"><div class="kpi-icon blue">▦</div><span class="kpi-label">Luminarias relevadas</span><strong id="k-lum">–</strong><small id="k-led">–</small></article>
+      <article class="kpi"><div class="kpi-icon violet">↘</div><span class="kpi-label">Emisiones evitadas</span><strong id="k-evit">–</strong><small>Proyectos de recambio LED</small></article>
+    </div>
+    <div id="home-error"></div>
+
+    <div class="section-heading"><div><h2>Flujo del módulo</h2><p>Los cuatro componentes funcionales pedidos por la consigna.</p></div></div>
+    <div class="flow">
+      <a class="flow-step" href="carga.html"><span class="step">01</span><b>Carga de datos</b><small>Edificio, sector, período, tipo de luminaria, potencia, horas de uso y fuente del dato, con validaciones.</small></a>
+      <a class="flow-step" href="configuracion.html"><span class="step">02</span><b>Integración con la API</b><small>Consulta catálogos y factores de emisión; envía datos de actividad y resultados.</small></a>
+      <a class="flow-step" href="calculo.html"><span class="step">03</span><b>Cálculo y trazabilidad</b><small>Conversión de unidades, aplicación del FE y detalle paso a paso de cada resultado.</small></a>
+      <a class="flow-step" href="visualizacion.html"><span class="step">04</span><b>Visualización</b><small>Indicadores, evolución temporal, comparaciones entre edificios y distribución.</small></a>
+    </div>
+
+    <div class="grid-2 mt">
+      <article class="panel">
+        <div class="panel-head"><div><h3>Accesos rápidos</h3><p>Continuá con una tarea del módulo.</p></div></div>
+        <div class="quick-list">
+          <a class="quick-link" href="carga.html"><span class="quick-icon blue">＋</span><span><b>Registrar luminarias</b><small>Nuevo dato de actividad para un sector de un edificio.</small></span><strong>→</strong></a>
+          <a class="quick-link" href="calculo.html"><span class="quick-icon gold">∑</span><span><b>Calcular pendientes</b><small id="k-pend">Datos de actividad sin resultado de emisiones.</small></span><strong>→</strong></a>
+          <a class="quick-link" href="visualizacion.html"><span class="quick-icon green">▥</span><span><b>Ver tablero</b><small>Comparar edificios y períodos.</small></span><strong>→</strong></a>
+          <a class="quick-link" href="mitigacion.html"><span class="quick-icon violet">↘</span><span><b>Evaluar recambio LED</b><small>Calcular emisiones evitadas de un proyecto.</small></span><strong>→</strong></a>
+        </div>
+      </article>
+      <article class="panel note-panel">
+        <div class="note-icon">i</div>
+        <h3>Sobre estos datos</h3>
+        <p>En <b>modo demostración</b> la API central se simula en el navegador con datos ilustrativos (edificios, cantidades y factores de emisión de ejemplo). No son datos oficiales de la Facultad.</p>
+        <p>Cuando la cátedra publique la API REST común, se configura su URL en <a href="configuracion.html">Configuración API</a> y todas las páginas pasan a consultar y enviar datos reales sin cambiar el código.</p>
+      </article>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/contexto.js"></script>
+  <script src="js/pages/inicio.js"></script>
+</body>
+</html>

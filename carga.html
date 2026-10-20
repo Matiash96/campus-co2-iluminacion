@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carga de datos · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="carga" data-title="Carga de datos de iluminación">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="section-heading">
+      <div><h2 id="form-title">Nuevo dato de actividad</h2><p>Relevamiento anual de luminarias por edificio y sector. Se envía a <code>POST /datos-actividad</code>.</p></div>
+      <span class="required-note"><span style="color:#d35454">*</span> Campos obligatorios</span>
+    </div>
+
+    <form id="activity-form" class="panel form-panel" novalidate>
+      <input type="hidden" id="id_actividad">
+
+      <div class="form-section-title"><span class="step">01</span><div><h3>Ubicación, período y actividad</h3><p>Dónde y cuándo se relevó el dato.</p></div></div>
+      <div class="form-grid">
+        <label class="field">Universidad<input id="universidad" readonly></label>
+        <label class="field"><span class="lbl">Edificio <span class="req">*</span></span><select id="id_edificio" required></select><span class="error-text">Seleccioná un edificio.</span></label>
+        <label class="field"><span class="lbl">Sector / espacio <span class="req">*</span></span><select id="id_sector" required></select><span class="error-text">Seleccioná un sector del edificio.</span><small id="sector-info"></small></label>
+        <label class="field"><span class="lbl">Período (anual) <span class="req">*</span></span><select id="id_periodo" required></select><span class="error-text">Seleccioná un período.</span><small id="periodo-info"></small></label>
+        <label class="field">Dimensión<input id="dimension" readonly></label>
+        <label class="field"><span class="lbl">Actividad <span class="req">*</span></span>
+          <select id="tipo_actividad" required>
+            <option>Iluminación interior</option>
+            <option>Iluminación exterior</option>
+            <option>Iluminación de emergencia</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-section-title separated"><span class="step">02</span><div><h3>Luminarias</h3><p>Al elegir el tipo se propone su potencia de referencia; podés corregirla con el dato de placa.</p></div></div>
+      <div class="form-grid">
+        <label class="field"><span class="lbl">Tipo de luminaria <span class="req">*</span></span><select id="id_tipo_luminaria" required></select><span class="error-text">Seleccioná un tipo de luminaria.</span><small id="tipo-info"></small></label>
+        <label class="field"><span class="lbl">Potencia por unidad <span class="req">*</span></span>
+          <span class="input-group">
+            <input id="potencia_unitaria" type="number" step="any" min="0" required>
+            <select id="unidad_potencia"><option value="W">W</option><option value="kW">kW</option></select>
+          </span>
+          <span class="error-text" id="err-potencia">Ingresá una potencia entre 0,5 W y 2 kW por unidad.</span>
+        </label>
+        <label class="field"><span class="lbl">Cantidad instalada (u) <span class="req">*</span></span><input id="cantidad" type="number" min="1" step="1" required><span class="error-text">Ingresá un número entero entre 1 y 10.000.</span></label>
+        <label class="field"><span class="lbl">Simultaneidad de uso (%) <span class="req">*</span></span><input id="factor_simultaneidad" type="number" min="1" max="100" step="1" value="100" required><span class="error-text">Debe estar entre 1 y 100 %.</span><small>Porcentaje de las luminarias que se encienden en simultáneo.</small></label>
+      </div>
+
+      <div class="form-section-title separated"><span class="step">03</span><div><h3>Tiempo de uso</h3><p>Periodicidad anual: podés cargar horas por día + días por año, u horas anuales directas.</p></div></div>
+      <div class="form-grid">
+        <label class="field"><span class="lbl">Unidad del tiempo de uso <span class="req">*</span></span>
+          <select id="unidad_tiempo"><option value="h/día">horas por día (h/día)</option><option value="h/año">horas por año (h/año)</option></select>
+        </label>
+        <label class="field"><span class="lbl">Horas de uso <span class="req">*</span></span><input id="horas_uso" type="number" min="0" step="any" required><span class="error-text" id="err-horas">Ingresá entre 0,5 y 24 h/día.</span></label>
+        <label class="field"><span class="lbl">Días de uso por año <span class="req">*</span></span><input id="dias_anio" type="number" min="1" max="366" step="1" required><span class="error-text">Ingresá entre 1 y 366 días.</span></label>
+      </div>
+
+      <div class="form-section-title separated"><span class="step">04</span><div><h3>Fuente y calidad del dato</h3><p>Necesario para la trazabilidad del resultado.</p></div></div>
+      <div class="form-grid">
+        <label class="field"><span class="lbl">Fuente del dato <span class="req">*</span></span><select id="id_fuente" required></select><span class="error-text">Seleccioná la fuente.</span></label>
+        <label class="field"><span class="lbl">Fecha de relevamiento <span class="req">*</span></span><input id="fecha_relevamiento" type="date" required><span class="error-text">La fecha debe pertenecer al período seleccionado y no ser futura.</span></label>
+        <label class="field"><span class="lbl">Responsable <span class="req">*</span></span><input id="responsable" maxlength="80" placeholder="Ej. Grupo 4 – Iluminación" required><span class="error-text">Indicá quién relevó el dato (mín. 3 caracteres).</span></label>
+        <label class="field span-all">Observaciones<textarea id="observaciones" rows="2" maxlength="500" placeholder="Ej. Potencia tomada de la etiqueta; 3 tubos quemados no contabilizados."></textarea></label>
+      </div>
+
+      <div class="calc-preview">
+        <div><span>Potencia instalada</span><strong id="pv-kw">–</strong></div>
+        <div><span>Consumo anual estimado</span><strong id="pv-kwh">–</strong></div>
+        <div><span>Emisiones estimadas (FE del período)</span><strong id="pv-co2">–</strong></div>
+        <small id="pv-formula">Consumo [kWh] = cantidad × potencia [W] ÷ 1000 × horas/año × simultaneidad. Emisiones = kWh × FE. El resultado oficial se genera en “Cálculo y trazabilidad”.</small>
+      </div>
+      <div id="dup-warning"></div>
+
+      <details class="mt"><summary class="required-note" style="cursor:pointer">Ver JSON que se enviará a la API</summary><pre class="json-box mt" id="payload-preview"></pre></details>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel">Limpiar</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit">Guardar dato de actividad <span>→</span></button>
+      </div>
+      <p id="form-message" class="form-message" aria-live="polite"></p>
+    </form>
+
+    <article class="panel mt">
+      <div class="panel-head">
+        <div><h3>Datos de actividad registrados</h3><p>Consultados con <code>GET /datos-actividad</code>.</p></div>
+        <div class="toolbar">
+          <label class="field">Período<select id="f-periodo"></select></label>
+          <label class="field">Edificio<select id="f-edificio"></select></label>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Edificio / sector</th><th>Tipo de luminaria</th><th class="num">Cant.</th><th class="num">Potencia</th><th class="num">Horas/año</th><th class="num">Consumo</th><th>Fuente</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="activity-table"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody>
+        </table>
+      </div>
+    </article>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/contexto.js"></script>
+  <script src="js/pages/carga.js"></script>
+</body>
+</html>

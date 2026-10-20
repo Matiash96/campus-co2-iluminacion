@@ -1,0 +1,5 @@
+.claude/
+.vercel/
+*.zip
+Thumbs.db
+.DS_Store

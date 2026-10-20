@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modelo de medición · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="metodologia" data-title="Modelo de medición">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="grid-2">
+      <article class="panel doc">
+        <h3>¿Qué se mide?</h3>
+        <p>Las emisiones de gases de efecto invernadero (en CO₂ equivalente) asociadas al <b>consumo de energía eléctrica de la iluminación</b> de cada edificio de la UTN FRC, desagregadas por sector o espacio y por tecnología de luminaria.</p>
+        <h3>Alcance</h3>
+        <p><span class="badge">Alcance 2</span> Emisiones indirectas por la electricidad comprada a la red (GHG Protocol, ISO 14064-1), con el <b>método basado en ubicación</b>: se usa el factor de emisión promedio de la red eléctrica argentina para el año del período.</p>
+        <p><span class="badge ok">Emisiones evitadas</span> Los proyectos de recambio a LED se informan aparte y <b>no se restan</b> del inventario de Alcance 1 + 2 + 3.</p>
+        <h3>Periodicidad</h3>
+        <p><b>Anual.</b> Cada dato de actividad pertenece a un período (año calendario). El tiempo de uso se puede cargar como horas/día × días/año o directamente en horas/año.</p>
+      </article>
+
+      <article class="panel doc">
+        <h3>Fórmulas</h3>
+        <div class="formula">P<sub>inst</sub> [kW] = n × P<sub>unit</sub> [W] ÷ 1000</div>
+        <div class="formula">h<sub>año</sub> [h] = horas/día × días/año</div>
+        <div class="formula">E<sub>kWh</sub> = P<sub>inst</sub> × h<sub>año</sub> × (simultaneidad ÷ 100)</div>
+        <div class="formula">Emisiones [kgCO₂e] = E<sub>kWh</sub> × FE [kgCO₂e/kWh]</div>
+        <div class="formula">Emisiones [tCO₂e] = kgCO₂e ÷ 1000</div>
+        <div class="formula">Evitadas [kgCO₂e] = (E<sub>base</sub> − E<sub>mejorado</sub>) × FE</div>
+        <p>Conversiones soportadas: W ↔ kW, Wh/kWh/MWh, kg ↔ t, y factores en kgCO₂e/kWh, tCO₂e/MWh, kgCO₂e/MWh o gCO₂e/kWh (todos se normalizan a kgCO₂e/kWh).</p>
+      </article>
+    </div>
+
+    <article class="panel mt">
+      <div class="panel-head"><div><h3>Variables y unidades</h3></div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Unidad</th><th>Origen</th><th>Validación</th></tr></thead>
+        <tbody>
+          <tr><td>Edificio, sector y superficie</td><td>m²</td><td>Catálogo central / Infraestructura</td><td>Sector perteneciente al edificio</td></tr>
+          <tr><td>Período</td><td>año</td><td>Catálogo central</td><td>Obligatorio</td></tr>
+          <tr><td>Tipo de luminaria / tecnología</td><td>—</td><td>Catálogo de la dimensión</td><td>Obligatorio</td></tr>
+          <tr><td>Cantidad instalada (n)</td><td>u</td><td>Relevamiento presencial / inventario</td><td>Entero 1 – 10.000</td></tr>
+          <tr><td>Potencia unitaria (P)</td><td>W o kW</td><td>Placa, ficha técnica o catálogo</td><td>0,5 W – 2 kW; aviso si difiere ±50 % de la referencia</td></tr>
+          <tr><td>Horas de uso</td><td>h/día o h/año</td><td>Horarios de cursado y encuestas a personal</td><td>0,5 – 24 h/día o ≤ 8.784 h/año</td></tr>
+          <tr><td>Días de uso</td><td>días/año</td><td>Calendario académico</td><td>1 – 365/366</td></tr>
+          <tr><td>Simultaneidad</td><td>%</td><td>Observación en campo</td><td>1 – 100</td></tr>
+          <tr><td>Factor de emisión de red (FE)</td><td>kgCO₂e/kWh</td><td>API central (Secretaría de Energía / CAMMESA)</td><td>Uno por período</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+
+    <div class="grid-2 mt">
+      <article class="panel doc">
+        <h3>Relevamiento: dónde está la información y quién la provee</h3>
+        <ul>
+          <li><b>Inventario de luminarias:</b> Departamento de Mantenimiento / Infraestructura de la FRC; se complementa con recorrida presencial por sectores.</li>
+          <li><b>Superficies y planos:</b> Oficina de Infraestructura / Planeamiento.</li>
+          <li><b>Horarios de uso:</b> Secretaría Académica (grilla de cursado) y personal de cada área.</li>
+          <li><b>Consumo eléctrico total (validación cruzada):</b> facturas de la distribuidora (dimensión 1 – Energía eléctrica).</li>
+          <li><b>Factor de emisión:</b> lo publica la cátedra en la API central a partir de fuentes oficiales.</li>
+        </ul>
+      </article>
+      <article class="panel doc note-panel">
+        <h3>Calidad, supuestos y limitaciones</h3>
+        <ul>
+          <li>El consumo de iluminación se <b>estima</b> (potencia × horas); no hay medición dedicada por circuito.</li>
+          <li>Cuando no hay dato de placa se usa la potencia típica de catálogo: la fuente queda registrada como “Estimación por catálogo”.</li>
+          <li>No se incluyen pérdidas de balastos ni equipos auxiliares, salvo que se carguen en la potencia unitaria.</li>
+          <li>Las horas de uso son promedios anuales; los recesos se reflejan en los días/año.</li>
+          <li>Los datos y factores del modo demostración son <b>ilustrativos</b> y deben reemplazarse por los oficiales.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/layout.js"></script>
+</body>
+</html>

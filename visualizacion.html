@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visualización · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body data-page="visualizacion" data-title="Tablero de emisiones por iluminación">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="section-heading">
+      <div><h2>Indicadores principales</h2><p>Calculados a partir de <code>GET /datos-actividad</code> y <code>GET /resultados-emisiones</code>.</p></div>
+      <div class="toolbar">
+        <label class="field">Período<select id="periodo"></select></label>
+        <label class="field">Edificio<select id="edificio"></select></label>
+        <label class="field">Unidad<select id="unidad"><option value="t">tCO₂e</option><option value="kg">kgCO₂e</option></select></label>
+      </div>
+    </div>
+    <div id="viz-error"></div>
+
+    <div class="kpi-grid">
+      <article class="kpi"><div class="kpi-icon green">◉</div><span class="kpi-label">Emisiones (Alcance 2)</span><strong id="k-co2">–</strong><small id="k-co2-d">–</small></article>
+      <article class="kpi"><div class="kpi-icon gold">ϟ</div><span class="kpi-label">Consumo eléctrico anual</span><strong id="k-kwh">–</strong><small id="k-kwh-d">–</small></article>
+      <article class="kpi"><div class="kpi-icon blue">▦</div><span class="kpi-label">Luminarias relevadas</span><strong id="k-lum">–</strong><small id="k-led">–</small></article>
+      <article class="kpi"><div class="kpi-icon violet">↘</div><span class="kpi-label">Emisiones evitadas (proyectos)</span><strong id="k-evit">–</strong><small>Recambio a tecnología eficiente</small></article>
+    </div>
+
+    <div class="section-heading"><div><h2>Indicadores específicos de iluminación</h2><p>Permiten comparar edificios de distinto tamaño.</p></div></div>
+    <div class="kpi-grid">
+      <article class="kpi"><span class="kpi-label">Potencia instalada</span><strong id="k-kw">–</strong><small>Suma de n × P</small></article>
+      <article class="kpi"><span class="kpi-label">Densidad de potencia (LPD)</span><strong id="k-lpd">–</strong><small>W instalados por m² (espacios interiores)</small></article>
+      <article class="kpi"><span class="kpi-label">Intensidad de emisiones</span><strong id="k-int">–</strong><small>kgCO₂e por m² y año</small></article>
+      <article class="kpi"><span class="kpi-label">Uso medio equivalente</span><strong id="k-hrs">–</strong><small>kWh ÷ kW instalados (h/año)</small></article>
+    </div>
+
+    <div class="charts-grid">
+      <article class="panel chart-panel"><div class="panel-head"><div><h3>Emisiones por edificio</h3><p id="t-edif">Período seleccionado.</p></div></div><div class="chart-container"><canvas id="ch-edificio" aria-label="Emisiones por edificio"></canvas></div></article>
+      <article class="panel chart-panel"><div class="panel-head"><div><h3>Evolución temporal</h3><p>Emisiones anuales por edificio.</p></div></div><div class="chart-container"><canvas id="ch-evolucion" aria-label="Evolución temporal de emisiones"></canvas></div></article>
+      <article class="panel chart-panel"><div class="panel-head"><div><h3>Comparación con el período anterior</h3><p id="t-comp">Emisiones por edificio.</p></div></div><div class="chart-container"><canvas id="ch-comparacion" aria-label="Comparación interanual"></canvas></div></article>
+      <article class="panel chart-panel"><div class="panel-head"><div><h3>Distribución por tecnología</h3><p>Participación en las emisiones del período.</p></div></div><div class="chart-container"><canvas id="ch-tecnologia" aria-label="Distribución por tecnología"></canvas></div></article>
+      <article class="panel chart-panel wide"><div class="panel-head"><div><h3>Distribución por tipo de espacio</h3><p>Emisiones del período según uso del sector.</p></div></div><div class="chart-container" style="height:230px"><canvas id="ch-espacio" aria-label="Distribución por tipo de espacio"></canvas></div></article>
+    </div>
+
+    <article class="panel mt">
+      <div class="panel-head"><div><h3>Resumen por edificio</h3><p>Tabla de datos de los gráficos (accesible y exportable).</p></div><button class="btn btn-outline btn-sm" id="btn-csv">Descargar CSV</button></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Edificio</th><th class="num">Luminarias</th><th class="num">% LED</th><th class="num">Potencia</th><th class="num">Consumo</th><th class="num">Emisiones</th><th class="num">Δ vs. año anterior</th><th class="num">W/m²</th><th class="num">kgCO₂e/m²</th></tr></thead>
+        <tbody id="tbl-edificios"></tbody>
+      </table></div>
+    </article>
+
+    <article class="panel mt">
+      <div class="panel-head"><div><h3>Ranking de sectores por densidad de potencia</h3><p>Los sectores con mayor W/m² y baja proporción LED son candidatos a proyectos de mitigación.</p></div><a class="btn btn-outline btn-sm" href="mitigacion.html">Evaluar recambio →</a></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Sector</th><th>Edificio</th><th>Tipo de espacio</th><th class="num">Superficie</th><th class="num">W/m²</th><th class="num">kgCO₂e/m²</th><th class="num">% LED</th><th>Prioridad</th></tr></thead>
+        <tbody id="tbl-sectores"></tbody>
+      </table></div>
+    </article>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/contexto.js"></script>
+  <script src="js/pages/visualizacion.js"></script>
+</body>
+</html>

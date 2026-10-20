@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mitigación · Campus CO₂ Iluminación</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="mitigacion" data-title="Proyectos de mitigación: recambio a LED">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="section-heading">
+      <div><h2>Oportunidades detectadas</h2><p>Registros del período con tecnología no eficiente. Elegí uno para precargar el escenario base.</p></div>
+      <div class="toolbar"><label class="field">Período<select id="op-periodo"></select></label></div>
+    </div>
+    <article class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Edificio / sector</th><th>Tecnología actual</th><th class="num">Cant.</th><th class="num">Consumo actual</th><th>Reemplazo sugerido</th><th class="num">Ahorro estimado</th><th></th></tr></thead>
+        <tbody id="op-table"><tr><td colspan="7" class="empty">Cargando…</td></tr></tbody>
+      </table></div>
+    </article>
+
+    <div class="section-heading"><div><h2>Evaluar proyecto</h2><p>Emisiones evitadas = (consumo base − consumo mejorado) × FE. Se envía a <code>POST /proyectos-mitigacion</code> y <code>POST /emisiones-evitadas</code>.</p></div></div>
+    <div class="mitigation-layout">
+      <form id="project-form" class="panel form-panel" novalidate>
+        <div class="form-section-title"><span class="step">01</span><div><h3>Datos del proyecto</h3><p>Identificación y alcance de la iniciativa.</p></div></div>
+        <div class="form-grid cols-2">
+          <label class="field span-2"><span class="lbl">Nombre del proyecto <span class="req">*</span></span><input id="nombre" maxlength="120" required><span class="error-text">Ingresá un nombre (mín. 5 caracteres).</span></label>
+          <label class="field"><span class="lbl">Edificio <span class="req">*</span></span><select id="id_edificio" required></select><span class="error-text">Seleccioná un edificio.</span></label>
+          <label class="field"><span class="lbl">Período de evaluación <span class="req">*</span></span><select id="id_periodo" required></select><small id="fe-info"></small></label>
+          <label class="field"><span class="lbl">Estado <span class="req">*</span></span><select id="estado"><option>Planificado</option><option>En evaluación</option><option>En ejecución</option><option>Implementado</option></select></label>
+          <label class="field"><span class="lbl">Fecha de inicio <span class="req">*</span></span><input id="fecha_inicio" type="date" required><span class="error-text">Ingresá la fecha de inicio.</span></label>
+          <label class="field span-2">Descripción<textarea id="descripcion" rows="2" maxlength="500"></textarea></label>
+        </div>
+
+        <div class="form-section-title separated"><span class="step">02</span><div><h3>Escenarios</h3><p>Situación actual vs. situación con la mejora.</p></div></div>
+        <div class="form-grid cols-2">
+          <label class="field"><span class="lbl">Tipo actual (base) <span class="req">*</span></span><select id="tipo_base"></select></label>
+          <label class="field"><span class="lbl">Tipo propuesto <span class="req">*</span></span><select id="tipo_nuevo"></select></label>
+          <label class="field"><span class="lbl">Potencia base (W/u) <span class="req">*</span></span><input id="potencia_base" type="number" min="0.5" step="any" required><span class="error-text">Entre 0,5 y 2000 W.</span></label>
+          <label class="field"><span class="lbl">Potencia propuesta (W/u) <span class="req">*</span></span><input id="potencia_nueva" type="number" min="0.5" step="any" required><span class="error-text">Entre 0,5 W y la potencia base.</span></label>
+          <label class="field"><span class="lbl">Cantidad base (u) <span class="req">*</span></span><input id="cantidad_base" type="number" min="1" step="1" required><span class="error-text">Entero entre 1 y 10.000.</span></label>
+          <label class="field"><span class="lbl">Cantidad propuesta (u) <span class="req">*</span></span><input id="cantidad_nueva" type="number" min="1" step="1" required><span class="error-text">Entero entre 1 y 10.000.</span></label>
+          <label class="field"><span class="lbl">Horas de uso por día <span class="req">*</span></span><input id="horas_uso" type="number" min="0.5" max="24" step="any" required><span class="error-text">Entre 0,5 y 24.</span></label>
+          <label class="field"><span class="lbl">Días de uso por año <span class="req">*</span></span><input id="dias_anio" type="number" min="1" max="366" step="1" required><span class="error-text">Entre 1 y 366.</span></label>
+        </div>
+        <div class="form-actions"><button type="submit" class="btn btn-success" id="btn-save">Registrar proyecto y emisiones evitadas <span>→</span></button></div>
+        <p id="project-message" class="form-message" aria-live="polite"></p>
+      </form>
+
+      <div class="stack">
+        <article class="panel result-highlight">
+          <div class="highlight-icon">↘</div>
+          <span class="kpi-label">Emisiones evitadas estimadas</span>
+          <strong id="avoided">–</strong>
+          <p id="avoided-note">Completá el formulario para calcular.</p>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><h3>Comparación anual</h3><p>Consumo eléctrico de ambos escenarios.</p></div></div>
+          <div class="scenario-row"><span class="scenario-dot base"></span><span>Escenario base</span><strong id="base-kwh">–</strong></div>
+          <div class="bar-track"><div class="bar-fill base-fill" id="base-bar" style="width:0"></div></div>
+          <div class="scenario-row"><span class="scenario-dot improved"></span><span>Escenario mejorado</span><strong id="new-kwh">–</strong></div>
+          <div class="bar-track"><div class="bar-fill improved-fill" id="new-bar" style="width:0"></div></div>
+          <div class="saving-note"><strong id="saving">–</strong><span>reducción estimada del consumo eléctrico de iluminación</span></div>
+        </article>
+        <article class="panel"><div class="panel-head"><div><h3>Trazabilidad</h3></div></div><ol class="trace-steps" id="mit-trace"></ol></article>
+      </div>
+    </div>
+
+    <article class="panel mt">
+      <div class="panel-head"><div><h3>Proyectos registrados</h3><p><code>GET /proyectos-mitigacion</code> + <code>GET /emisiones-evitadas</code></p></div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Proyecto</th><th>Edificio</th><th>Estado</th><th>Inicio</th><th class="num">Consumo base</th><th class="num">Consumo mejorado</th><th class="num">Emisiones evitadas</th></tr></thead>
+        <tbody id="project-table"></tbody>
+      </table></div>
+    </article>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/contexto.js"></script>
+  <script src="js/pages/mitigacion.js"></script>
+</body>
+</html>

@@ -36,8 +36,7 @@ CampusCO2.config = (function () {
     unidades:            { method: "GET",    path: "/unidades" },                   // ?magnitud=
     fuentesDatos:        { method: "GET",    path: "/fuentes-datos" },
     factoresEmision:     { method: "GET",    path: "/factores-emision" },           // ?id_periodo=&categoria=
-    // --- Catálogos propios de la dimensión (alojados en la API central) ---
-    sectores:            { method: "GET",    path: "/edificios/{id_edificio}/sectores" },
+    // --- Catálogo propio de la dimensión (alojado en la API central) ---
     tiposLuminaria:      { method: "GET",    path: "/tipos-luminaria" },
     // --- Datos de actividad ---
     listarActividades:   { method: "GET",    path: "/datos-actividad" },            // ?id_dimension=&id_periodo=&id_edificio=

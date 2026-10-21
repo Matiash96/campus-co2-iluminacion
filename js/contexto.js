@@ -10,16 +10,15 @@ CampusCO2.contexto = (function () {
   const byId = (arr, key) => Object.fromEntries((arr || []).map((x) => [x[key], x]));
 
   async function cargar() {
-    const [edificios, periodos, tipos, fuentes, dimension, sectores] = await Promise.all([
-      api.getEdificios(), api.getPeriodos(), api.getTiposLuminaria(), api.getFuentes(), api.getDimension(), api.getTodosLosSectores()
+    const [edificios, periodos, tipos, fuentes, dimension] = await Promise.all([
+      api.getEdificios(), api.getPeriodos(), api.getTiposLuminaria(), api.getFuentes(), api.getDimension()
     ]);
     return {
-      edificios, periodos, tipos, fuentes, dimension, sectores,
+      edificios, periodos, tipos, fuentes, dimension,
       edificioPorId: byId(edificios, "id_edificio"),
       periodoPorId: byId(periodos, "id_periodo"),
       tipoPorId: byId(tipos, "id_tipo_luminaria"),
-      fuentePorId: byId(fuentes, "id_fuente"),
-      sectorPorId: byId(sectores, "id_sector")
+      fuentePorId: byId(fuentes, "id_fuente")
     };
   }
 
@@ -38,12 +37,11 @@ CampusCO2.contexto = (function () {
     const ult = ultimoResultadoPorActividad(resultados);
     return (actividades || []).map((a) => {
       const det = a.detalle_iluminacion || {};
-      const sector = ctx.sectorPorId[det.id_sector] || {};
       const tipo = ctx.tipoPorId[det.id_tipo_luminaria] || {};
       const consumo = CampusCO2.calculo.calcularConsumo(det);
       const res = ult[a.id_actividad] || null;
       return {
-        actividad: a, det, sector, tipo, resultado: res,
+        actividad: a, det, tipo, resultado: res,
         edificio: (ctx.edificioPorId[a.id_edificio] || {}).nombre || `Edificio ${a.id_edificio}`,
         anio: (ctx.periodoPorId[a.id_periodo] || {}).anio,
         cantidad: Number(det.cantidad) || 0,

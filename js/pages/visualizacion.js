@@ -3,9 +3,10 @@
    comparaciones y distribución de emisiones.
    ========================================================= */
 document.addEventListener("DOMContentLoaded", async () => {
-  const { $, esc, fmt, fillSelect, apiErrorBox, PALETTE } = CampusCO2.ui;
+  const { $, esc, fmt, fillSelect, apiErrorBox, PALETTE, cssVar } = CampusCO2.ui;
   const api = CampusCO2.api;
   const charts = {};
+  let T = {}; // colores del tema actual (se leen de css/styles.css)
   let ctx, filas = [], proyectos = [], evitadas = [];
 
   try {
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   fillSelect($("periodo"), conDatos.slice().reverse(), "id_periodo", (p) => p.anio);
   fillSelect($("edificio"), ctx.edificios, "id_edificio", (e) => e.nombre, { placeholder: "Todos los edificios" });
   ["periodo", "edificio", "unidad"].forEach((id) => $(id).addEventListener("change", render));
+  document.addEventListener("themechange", () => render());
 
   // Color fijo por entidad (no por ranking): el edificio i siempre usa el mismo color
   const colorEdificio = Object.fromEntries(ctx.edificios.map((e, i) => [e.id_edificio, PALETTE[i % PALETTE.length]]));
@@ -32,15 +34,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sum = (arr, k) => arr.reduce((s, x) => s + (Number(typeof k === "function" ? k(x) : x[k]) || 0), 0);
 
   function agregados(lista) {
-    const interior = lista.filter((f) => f.sector.superficie_m2);
-    const m2 = [...new Set(interior.map((f) => f.sector.id_sector))].reduce((s, id) => s + (ctx.sectorPorId[id].superficie_m2 || 0), 0);
     const kw = sum(lista, "potencia_kw"), kwh = sum(lista, "kwh"), kg = sum(lista, "kg");
     const lum = sum(lista, "cantidad"), led = sum(lista.filter((f) => f.eficiente), "cantidad");
     return {
-      kg, kwh, kw, lum, led, m2,
+      kg, kwh, kw, lum, led,
       pctLed: lum ? (led / lum) * 100 : 0,
-      lpd: m2 ? (sum(interior, "potencia_kw") * 1000) / m2 : null,
-      intensidad: m2 ? sum(interior, "kg") / m2 : null,
+      kwhLum: lum ? kwh / lum : null,
+      kgLum: lum ? kg / lum : null,
       horas: kw ? kwh / kw : null,
       pendientes: lista.filter((f) => !f.resultado).length
     };
@@ -55,12 +55,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: "nearest", intersect: false },
       plugins: {
-        legend: { labels: { usePointStyle: true, boxWidth: 8, color: "#52514e", font: { size: 11 } } },
+        legend: { labels: { usePointStyle: true, boxWidth: 8, color: T.text, font: { size: 11 } } },
         tooltip: { callbacks: { label: (c) => `${c.dataset.label || c.label}: ${fmt(c.parsed.y ?? c.parsed.x ?? c.parsed, unidad() === "t" ? 3 : 1)} ${unidad() === "t" ? "tCO₂e" : "kgCO₂e"}` } }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: "#6b7280" } },
-        y: { beginAtZero: true, grid: { color: "#eef0f4" }, ticks: { color: "#6b7280" }, title: { display: true, text: unidad() === "t" ? "tCO₂e" : "kgCO₂e", color: "#6b7280" } }
+        x: { grid: { display: false }, ticks: { color: T.axis } },
+        y: { beginAtZero: true, grid: { color: T.grid }, ticks: { color: T.axis }, title: { display: true, text: unidad() === "t" ? "tCO₂e" : "kgCO₂e", color: T.axis } }
       }
     }, extra);
   }
@@ -75,6 +75,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function render() {
+    T = { text: cssVar("--chart-text"), axis: cssVar("--chart-axis"), grid: cssVar("--chart-grid"), card: cssVar("--card"), prev: cssVar("--muted") };
+    if (window.Chart) Chart.defaults.color = T.axis;
     const idP = Number($("periodo").value);
     const idE = $("edificio").value;
     const periodo = ctx.periodoPorId[idP];
@@ -95,8 +97,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ev = evitadas.filter((e) => e.id_periodo === idP && (!idE || String((proyPorId[e.id_proyecto] || {}).id_edificio) === idE));
     $("k-evit").innerHTML = co2Html(sum(ev, "kg_co2e_evitados"));
     $("k-kw").innerHTML = `${fmt(A.kw, 2)} <em>kW</em>`;
-    $("k-lpd").innerHTML = A.lpd == null ? "–" : `${fmt(A.lpd, 1)} <em>W/m²</em>`;
-    $("k-int").innerHTML = A.intensidad == null ? "–" : `${fmt(A.intensidad, 2)} <em>kgCO₂e/m²</em>`;
+    $("k-lpd").innerHTML = A.kwhLum == null ? "–" : `${fmt(A.kwhLum, 1)} <em>kWh/u</em>`;
+    $("k-int").innerHTML = A.kgLum == null ? "–" : `${fmt(A.kgLum, 2)} <em>kgCO₂e/u</em>`;
     $("k-hrs").innerHTML = A.horas == null ? "–" : `${fmt(A.horas, 0)} <em>h/año</em>`;
 
     const edificios = ctx.edificios.filter((e) => !idE || String(e.id_edificio) === idE);
@@ -108,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       type: "bar",
       data: { labels: porEd.map((x) => x.e.nombre), datasets: [{ label: "Emisiones", data: porEd.map((x) => conv(x.kg)), backgroundColor: porEd.map((x) => colorEdificio[x.e.id_edificio]), borderRadius: 4, maxBarThickness: 28 }] },
       options: baseOptions({ indexAxis: "y", plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => co2Txt(unidad() === "t" ? c.parsed.x * 1000 : c.parsed.x) } } },
-        scales: { x: { beginAtZero: true, grid: { color: "#eef0f4" }, title: { display: true, text: unidad() === "t" ? "tCO₂e" : "kgCO₂e" } }, y: { grid: { display: false } } } })
+        scales: { x: { beginAtZero: true, grid: { color: T.grid }, ticks: { color: T.axis }, title: { display: true, text: unidad() === "t" ? "tCO₂e" : "kgCO₂e", color: T.axis } }, y: { grid: { display: false }, ticks: { color: T.axis } } } })
     });
 
     // --- Evolución temporal (línea por edificio) ---
@@ -134,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       data: {
         labels: edificios.map((e) => e.nombre),
         datasets: [
-          prev && { label: String(prev.anio), data: edificios.map((e) => conv(sum(anterior.filter((f) => f.actividad.id_edificio === e.id_edificio), "kg"))), backgroundColor: "#a8b3c7", borderRadius: 4, maxBarThickness: 26 },
+          prev && { label: String(prev.anio), data: edificios.map((e) => conv(sum(anterior.filter((f) => f.actividad.id_edificio === e.id_edificio), "kg"))), backgroundColor: T.prev, borderRadius: 4, maxBarThickness: 26 },
           { label: String(periodo.anio), data: edificios.map((e) => conv(sum(actual.filter((f) => f.actividad.id_edificio === e.id_edificio), "kg"))), backgroundColor: PALETTE[0], borderRadius: 4, maxBarThickness: 26 }
         ].filter(Boolean)
       },
@@ -146,16 +148,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totalTec = sum(porTec, "kg");
     draw("ch-tecnologia", {
       type: "doughnut",
-      data: { labels: porTec.map((x) => x.t), datasets: [{ data: porTec.map((x) => conv(x.kg)), backgroundColor: porTec.map((x) => colorTec[x.t]), borderColor: "#fff", borderWidth: 2, hoverOffset: 4 }] },
+      data: { labels: porTec.map((x) => x.t), datasets: [{ data: porTec.map((x) => conv(x.kg)), backgroundColor: porTec.map((x) => colorTec[x.t]), borderColor: T.card, borderWidth: 2, hoverOffset: 4 }] },
       options: { responsive: true, maintainAspectRatio: false, cutout: "62%",
-        plugins: { legend: { position: "right", labels: { usePointStyle: true, boxWidth: 8, color: "#52514e", font: { size: 11 },
-          generateLabels: (ch) => ch.data.labels.map((l, i) => ({ text: `${l} · ${fmt((porTec[i].kg / totalTec) * 100, 0)} %`, fillStyle: ch.data.datasets[0].backgroundColor[i], strokeStyle: "#fff", pointStyle: "circle", index: i, fontColor: "#52514e" })) } },
+        plugins: { legend: { position: "right", labels: { usePointStyle: true, boxWidth: 8, color: T.text, font: { size: 11 },
+          generateLabels: (ch) => ch.data.labels.map((l, i) => ({ text: `${l} · ${fmt((porTec[i].kg / totalTec) * 100, 0)} %`, fillStyle: ch.data.datasets[0].backgroundColor[i], strokeStyle: T.card, pointStyle: "circle", index: i, fontColor: T.text })) } },
           tooltip: { callbacks: { label: (c) => `${c.label}: ${co2Txt(porTec[c.dataIndex].kg)} (${fmt((porTec[c.dataIndex].kg / totalTec) * 100, 1)} %)` } } } }
     });
 
-    // --- Distribución por tipo de espacio ---
-    const espacios = [...new Set(ctx.sectores.map((s) => s.tipo_espacio))];
-    const porEsp = espacios.map((t) => ({ t, kg: sum(actual.filter((f) => f.sector.tipo_espacio === t), "kg") })).filter((x) => x.kg > 0).sort((a, b) => b.kg - a.kg);
+    // --- Emisiones por tipo de luminaria ---
+    const porEsp = ctx.tipos.map((t) => ({ t: t.nombre, kg: sum(actual.filter((f) => f.tipo.id_tipo_luminaria === t.id_tipo_luminaria), "kg") })).filter((x) => x.kg > 0).sort((a, b) => b.kg - a.kg);
     draw("ch-espacio", {
       type: "bar",
       data: { labels: porEsp.map((x) => x.t), datasets: [{ label: "Emisiones", data: porEsp.map((x) => conv(x.kg)), backgroundColor: PALETTE[0], borderRadius: 4, maxBarThickness: 40 }] },
@@ -173,26 +174,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       <td class="num">${fmt(a.lum, 0)}</td><td class="num">${fmt(a.pctLed, 0)} %</td><td class="num">${fmt(a.kw, 2)} kW</td>
       <td class="num">${fmt(a.kwh, 0)} kWh</td><td class="num">${co2Txt(a.kg)}</td>
       <td class="num">${d == null ? "–" : `<span class="badge ${d > 0 ? "err" : "ok"}">${d > 0 ? "+" : ""}${fmt(d, 1)} %</span>`}</td>
-      <td class="num">${a.lpd == null ? "–" : fmt(a.lpd, 1)}</td><td class="num">${a.intensidad == null ? "–" : fmt(a.intensidad, 2)}</td></tr>`).join("") +
-      `<tr><td><b>Total</b></td><td class="num"><b>${fmt(A.lum, 0)}</b></td><td class="num"><b>${fmt(A.pctLed, 0)} %</b></td><td class="num"><b>${fmt(A.kw, 2)} kW</b></td><td class="num"><b>${fmt(A.kwh, 0)} kWh</b></td><td class="num"><b>${co2Txt(A.kg)}</b></td><td class="num">${P ? `${fmt(delta(A.kg, P.kg), 1)} %` : "–"}</td><td class="num">${A.lpd == null ? "–" : fmt(A.lpd, 1)}</td><td class="num">${A.intensidad == null ? "–" : fmt(A.intensidad, 2)}</td></tr>`;
+      <td class="num">${a.kwhLum == null ? "–" : fmt(a.kwhLum, 1)}</td><td class="num">${a.kgLum == null ? "–" : fmt(a.kgLum, 2)}</td></tr>`).join("") +
+      `<tr><td><b>Total</b></td><td class="num"><b>${fmt(A.lum, 0)}</b></td><td class="num"><b>${fmt(A.pctLed, 0)} %</b></td><td class="num"><b>${fmt(A.kw, 2)} kW</b></td><td class="num"><b>${fmt(A.kwh, 0)} kWh</b></td><td class="num"><b>${co2Txt(A.kg)}</b></td><td class="num">${P ? `${fmt(delta(A.kg, P.kg), 1)} %` : "–"}</td><td class="num">${A.kwhLum == null ? "–" : fmt(A.kwhLum, 1)}</td><td class="num">${A.kgLum == null ? "–" : fmt(A.kgLum, 2)}</td></tr>`;
 
-    // --- Ranking de sectores ---
-    const sectores = [...new Set(actual.map((f) => f.sector.id_sector))].map((id) => {
-      const s = ctx.sectorPorId[id];
-      const fs = actual.filter((f) => f.sector.id_sector === id);
-      const ag = agregados(fs);
-      return { s, ag, lpd: s.superficie_m2 ? (ag.kw * 1000) / s.superficie_m2 : null, int: s.superficie_m2 ? ag.kg / s.superficie_m2 : null };
-    }).sort((a, b) => (b.lpd ?? -1) - (a.lpd ?? -1));
-    $("tbl-sectores").innerHTML = sectores.map((x) => {
-      const prioridad = x.ag.pctLed >= 99 ? '<span class="badge ok">Eficiente</span>' : (x.lpd ?? 0) > 10 || x.lpd == null ? '<span class="badge err">Alta</span>' : '<span class="badge warn">Media</span>';
-      return `<tr><td><b>${esc(x.s.nombre)}</b></td><td>${esc(ctx.edificioPorId[x.s.id_edificio].nombre)}</td><td>${esc(x.s.tipo_espacio)}</td>
-        <td class="num">${x.s.superficie_m2 ? `${fmt(x.s.superficie_m2, 0)} m²` : "–"}</td><td class="num">${x.lpd == null ? "–" : fmt(x.lpd, 1)}</td>
-        <td class="num">${x.int == null ? "–" : fmt(x.int, 2)}</td><td class="num">${fmt(x.ag.pctLed, 0)} %</td><td>${prioridad}</td></tr>`;
+    // --- Ranking de grupos de luminarias (edificio + tipo) ---
+    const grupos = {};
+    actual.forEach((f) => {
+      const k = `${f.actividad.id_edificio}-${f.tipo.id_tipo_luminaria}`;
+      (grupos[k] = grupos[k] || { edificio: f.edificio, tipo: f.tipo, filas: [] }).filas.push(f);
+    });
+    const ranking = Object.values(grupos).map((g) => Object.assign(g, agregados(g.filas))).sort((a, b) => b.kg - a.kg);
+    const promedioKg = ranking.length ? sum(ranking, "kg") / ranking.length : 0;
+    $("tbl-grupos").innerHTML = ranking.map((x) => {
+      const prioridad = x.tipo.eficiente ? '<span class="badge ok">Eficiente</span>' : x.kg >= promedioKg ? '<span class="badge err">Alta</span>' : '<span class="badge warn">Media</span>';
+      return `<tr><td><b>${esc(x.edificio)}</b></td><td>${esc(x.tipo.nombre || "")}</td><td>${esc(x.tipo.tecnologia || "")}</td>
+        <td class="num">${fmt(x.lum, 0)}</td><td class="num">${fmt(x.kw, 2)} kW</td><td class="num">${fmt(x.kwh, 0)} kWh</td>
+        <td class="num">${co2Txt(x.kg)}</td><td>${prioridad}</td></tr>`;
     }).join("") || '<tr><td colspan="8" class="empty">Sin datos.</td></tr>';
 
     $("btn-csv").onclick = () => {
-      const rows = [["edificio", "periodo", "luminarias", "pct_led", "potencia_kw", "consumo_kwh", "emisiones_kg_co2e", "w_m2", "kg_co2e_m2"]]
-        .concat(resumen.map(({ e, a }) => [e.nombre, periodo.anio, a.lum, a.pctLed.toFixed(1), a.kw.toFixed(3), a.kwh.toFixed(2), a.kg.toFixed(3), a.lpd == null ? "" : a.lpd.toFixed(2), a.intensidad == null ? "" : a.intensidad.toFixed(3)]));
+      const rows = [["edificio", "periodo", "luminarias", "pct_led", "potencia_kw", "consumo_kwh", "emisiones_kg_co2e", "kwh_por_luminaria", "kg_co2e_por_luminaria"]]
+        .concat(resumen.map(({ e, a }) => [e.nombre, periodo.anio, a.lum, a.pctLed.toFixed(1), a.kw.toFixed(3), a.kwh.toFixed(2), a.kg.toFixed(3), a.kwhLum == null ? "" : a.kwhLum.toFixed(2), a.kgLum == null ? "" : a.kgLum.toFixed(3)]));
       const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));

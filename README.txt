@@ -7,15 +7,18 @@ Sitio multipágina (HTML + CSS + JavaScript, sin frameworks ni build).
 PÁGINAS
 - index.html ............ Inicio: KPIs del último período y flujo del módulo
 - metodologia.html ...... Modelo de medición: alcance, variables, unidades, fórmulas, relevamiento
-- carga.html ............ MÓDULO DE CARGA: formulario con validaciones (edificio, sector,
-                          período, actividad, luminaria, potencia + unidad, horas, fuente)
+- carga.html ............ MÓDULO DE CARGA: formulario con validaciones (edificio, período,
+                          luminaria, potencia + unidad, horas, fuente)
 - calculo.html .......... MÓDULO DE CÁLCULO: aplica el factor de emisión del período,
                           convierte unidades, muestra la trazabilidad y envía los resultados
 - visualizacion.html .... MÓDULO DE VISUALIZACIÓN: KPIs, emisiones por edificio, evolución
                           temporal, comparación interanual, distribución por tecnología y
-                          por tipo de espacio, W/m², kgCO2e/m², ranking de sectores, CSV
+                          por tipo de luminaria, kWh y kgCO2e por luminaria, ranking, CSV
 - mitigacion.html ....... Proyectos de recambio a LED y emisiones evitadas
 - configuracion.html .... INTEGRACIÓN CON LA API: URL base, token, modo demo, prueba de conexión
+
+Todas las páginas tienen un botón para cambiar entre modo claro y oscuro (se recuerda
+en el navegador; sin elección, sigue el tema del sistema).
 
 ESTRUCTURA
 - css/styles.css ........ estilos compartidos (responsive)
@@ -27,7 +30,7 @@ ESTRUCTURA
 - js/contexto.js ........ carga de catálogos y unión de datos
 - js/pages/*.js ......... lógica de cada página
 - docs/API_y_Modelo_de_Datos.md ............. endpoints + modelo de datos (para el profesor)
-- docs/mapa_entidad_relacion_iluminacion_v2.drawio ... diagrama ER actualizado
+- docs/mapa_entidad_relacion_iluminacion_v3.drawio ... diagrama ER actualizado
 
 CÓMO ABRIR
 Opción A: abrir index.html con doble clic.

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Modelo de medición · Campus CO₂ Iluminación</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-page="metodologia" data-title="Modelo de medición">
   <aside id="app-sidebar"></aside>
@@ -14,7 +15,7 @@
     <div class="grid-2">
       <article class="panel doc">
         <h3>¿Qué se mide?</h3>
-        <p>Las emisiones de gases de efecto invernadero (en CO₂ equivalente) asociadas al <b>consumo de energía eléctrica de la iluminación</b> de cada edificio de la UTN FRC, desagregadas por sector o espacio y por tecnología de luminaria.</p>
+        <p>Las emisiones de gases de efecto invernadero (en CO₂ equivalente) asociadas al <b>consumo de energía eléctrica de la iluminación</b> de cada edificio de la UTN FRC, desagregadas por tipo y tecnología de luminaria.</p>
         <h3>Alcance</h3>
         <p><span class="badge">Alcance 2</span> Emisiones indirectas por la electricidad comprada a la red (GHG Protocol, ISO 14064-1), con el <b>método basado en ubicación</b>: se usa el factor de emisión promedio de la red eléctrica argentina para el año del período.</p>
         <p><span class="badge ok">Emisiones evitadas</span> Los proyectos de recambio a LED se informan aparte y <b>no se restan</b> del inventario de Alcance 1 + 2 + 3.</p>
@@ -39,7 +40,7 @@
       <div class="table-wrap"><table>
         <thead><tr><th>Variable</th><th>Unidad</th><th>Origen</th><th>Validación</th></tr></thead>
         <tbody>
-          <tr><td>Edificio, sector y superficie</td><td>m²</td><td>Catálogo central / Infraestructura</td><td>Sector perteneciente al edificio</td></tr>
+          <tr><td>Edificio</td><td>—</td><td>Catálogo central</td><td>Obligatorio</td></tr>
           <tr><td>Período</td><td>año</td><td>Catálogo central</td><td>Obligatorio</td></tr>
           <tr><td>Tipo de luminaria / tecnología</td><td>—</td><td>Catálogo de la dimensión</td><td>Obligatorio</td></tr>
           <tr><td>Cantidad instalada (n)</td><td>u</td><td>Relevamiento presencial / inventario</td><td>Entero 1 – 10.000</td></tr>
@@ -56,8 +57,7 @@
       <article class="panel doc">
         <h3>Relevamiento: dónde está la información y quién la provee</h3>
         <ul>
-          <li><b>Inventario de luminarias:</b> Departamento de Mantenimiento / Infraestructura de la FRC; se complementa con recorrida presencial por sectores.</li>
-          <li><b>Superficies y planos:</b> Oficina de Infraestructura / Planeamiento.</li>
+          <li><b>Inventario de luminarias:</b> Departamento de Mantenimiento / Infraestructura de la FRC; se complementa con una recorrida presencial por cada edificio.</li>
           <li><b>Horarios de uso:</b> Secretaría Académica (grilla de cursado) y personal de cada área.</li>
           <li><b>Consumo eléctrico total (validación cruzada):</b> facturas de la distribuidora (dimensión 1 – Energía eléctrica).</li>
           <li><b>Factor de emisión:</b> lo publica la cátedra en la API central a partir de fuentes oficiales.</li>

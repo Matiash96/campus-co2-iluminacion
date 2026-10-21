@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Visualización · Campus CO₂ Iluminación</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body data-page="visualizacion" data-title="Tablero de emisiones por iluminación">
@@ -29,11 +30,11 @@
       <article class="kpi"><div class="kpi-icon violet">↘</div><span class="kpi-label">Emisiones evitadas (proyectos)</span><strong id="k-evit">–</strong><small>Recambio a tecnología eficiente</small></article>
     </div>
 
-    <div class="section-heading"><div><h2>Indicadores específicos de iluminación</h2><p>Permiten comparar edificios de distinto tamaño.</p></div></div>
+    <div class="section-heading"><div><h2>Indicadores específicos de iluminación</h2><p>Permiten comparar edificios y tecnologías de luminaria.</p></div></div>
     <div class="kpi-grid">
       <article class="kpi"><span class="kpi-label">Potencia instalada</span><strong id="k-kw">–</strong><small>Suma de n × P</small></article>
-      <article class="kpi"><span class="kpi-label">Densidad de potencia (LPD)</span><strong id="k-lpd">–</strong><small>W instalados por m² (espacios interiores)</small></article>
-      <article class="kpi"><span class="kpi-label">Intensidad de emisiones</span><strong id="k-int">–</strong><small>kgCO₂e por m² y año</small></article>
+      <article class="kpi"><span class="kpi-label">Consumo por luminaria</span><strong id="k-lpd">–</strong><small>kWh por luminaria y por año</small></article>
+      <article class="kpi"><span class="kpi-label">Emisiones por luminaria</span><strong id="k-int">–</strong><small>kgCO₂e por luminaria y por año</small></article>
       <article class="kpi"><span class="kpi-label">Uso medio equivalente</span><strong id="k-hrs">–</strong><small>kWh ÷ kW instalados (h/año)</small></article>
     </div>
 
@@ -42,22 +43,22 @@
       <article class="panel chart-panel"><div class="panel-head"><div><h3>Evolución temporal</h3><p>Emisiones anuales por edificio.</p></div></div><div class="chart-container"><canvas id="ch-evolucion" aria-label="Evolución temporal de emisiones"></canvas></div></article>
       <article class="panel chart-panel"><div class="panel-head"><div><h3>Comparación con el período anterior</h3><p id="t-comp">Emisiones por edificio.</p></div></div><div class="chart-container"><canvas id="ch-comparacion" aria-label="Comparación interanual"></canvas></div></article>
       <article class="panel chart-panel"><div class="panel-head"><div><h3>Distribución por tecnología</h3><p>Participación en las emisiones del período.</p></div></div><div class="chart-container"><canvas id="ch-tecnologia" aria-label="Distribución por tecnología"></canvas></div></article>
-      <article class="panel chart-panel wide"><div class="panel-head"><div><h3>Distribución por tipo de espacio</h3><p>Emisiones del período según uso del sector.</p></div></div><div class="chart-container" style="height:230px"><canvas id="ch-espacio" aria-label="Distribución por tipo de espacio"></canvas></div></article>
+      <article class="panel chart-panel wide"><div class="panel-head"><div><h3>Emisiones por tipo de luminaria</h3><p>Emisiones del período según el modelo de luminaria.</p></div></div><div class="chart-container" style="height:260px"><canvas id="ch-espacio" aria-label="Emisiones por tipo de luminaria"></canvas></div></article>
     </div>
 
     <article class="panel mt">
       <div class="panel-head"><div><h3>Resumen por edificio</h3><p>Tabla de datos de los gráficos (accesible y exportable).</p></div><button class="btn btn-outline btn-sm" id="btn-csv">Descargar CSV</button></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Edificio</th><th class="num">Luminarias</th><th class="num">% LED</th><th class="num">Potencia</th><th class="num">Consumo</th><th class="num">Emisiones</th><th class="num">Δ vs. año anterior</th><th class="num">W/m²</th><th class="num">kgCO₂e/m²</th></tr></thead>
+        <thead><tr><th>Edificio</th><th class="num">Luminarias</th><th class="num">% LED</th><th class="num">Potencia</th><th class="num">Consumo</th><th class="num">Emisiones</th><th class="num">Δ vs. año anterior</th><th class="num">kWh/luminaria</th><th class="num">kgCO₂e/luminaria</th></tr></thead>
         <tbody id="tbl-edificios"></tbody>
       </table></div>
     </article>
 
     <article class="panel mt">
-      <div class="panel-head"><div><h3>Ranking de sectores por densidad de potencia</h3><p>Los sectores con mayor W/m² y baja proporción LED son candidatos a proyectos de mitigación.</p></div><a class="btn btn-outline btn-sm" href="mitigacion.html">Evaluar recambio →</a></div>
+      <div class="panel-head"><div><h3>Ranking de grupos de luminarias por emisiones</h3><p>Los grupos con más emisiones y tecnología no eficiente son candidatos a proyectos de mitigación.</p></div><a class="btn btn-outline btn-sm" href="mitigacion.html">Evaluar recambio →</a></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Sector</th><th>Edificio</th><th>Tipo de espacio</th><th class="num">Superficie</th><th class="num">W/m²</th><th class="num">kgCO₂e/m²</th><th class="num">% LED</th><th>Prioridad</th></tr></thead>
-        <tbody id="tbl-sectores"></tbody>
+        <thead><tr><th>Edificio</th><th>Tipo de luminaria</th><th>Tecnología</th><th class="num">Cantidad</th><th class="num">Potencia</th><th class="num">Consumo</th><th class="num">Emisiones</th><th>Prioridad</th></tr></thead>
+        <tbody id="tbl-grupos"></tbody>
       </table></div>
     </article>
   </main>

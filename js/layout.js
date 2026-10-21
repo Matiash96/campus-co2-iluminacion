@@ -52,8 +52,12 @@ CampusCO2.ui = (function () {
     $("app-topbar").innerHTML = `
       <div><div class="eyebrow">Campus CO₂ / Dimensión 4 · Infraestructura y edificios</div><h1>${esc(body.dataset.title || "")}</h1></div>
       <div class="top-actions">
+        <button type="button" class="theme-toggle" id="theme-toggle"></button>
         <a class="pill" href="configuracion.html" title="Configurar conexión"><span class="status-dot ${c.useMock ? "mock" : ""}"></span>${c.useMock ? "Modo demo (API simulada)" : "Conectado a API central"}</a>
       </div>`;
+
+    $("theme-toggle").addEventListener("click", () => setTheme(temaActual() === "dark" ? "light" : "dark"));
+    pintarBotonTema();
 
     const footer = document.createElement("footer");
     footer.innerHTML = `<span>Campus CO₂ · Infraestructura y edificios – Análisis de iluminación por edificio</span><span>Cátedra Green Software · UTN FRC · Metodología ${esc(c.versionMetodologia)}</span>`;
@@ -64,6 +68,36 @@ CampusCO2.ui = (function () {
     host.id = "toast-host";
     document.body.appendChild(host);
   }
+
+  /* ---------- Modo claro / oscuro ----------
+     Sin elección guardada se sigue el tema del sistema operativo. */
+  const THEME_KEY = "campusco2.theme";
+  const sistemaOscuro = () => window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const temaActual = () => document.documentElement.dataset.theme || (sistemaOscuro() ? "dark" : "light");
+
+  function pintarBotonTema() {
+    const b = $("theme-toggle");
+    if (!b) return;
+    const oscuro = temaActual() === "dark";
+    b.innerHTML = oscuro ? "<span>☀</span> Modo claro" : "<span>☾</span> Modo oscuro";
+    b.setAttribute("aria-label", oscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+  }
+
+  function setTheme(tema) {
+    document.documentElement.dataset.theme = tema;
+    try { localStorage.setItem(THEME_KEY, tema); } catch (e) { /* sin almacenamiento */ }
+    pintarBotonTema();
+    document.dispatchEvent(new CustomEvent("themechange", { detail: tema }));
+  }
+
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (!document.documentElement.dataset.theme) { pintarBotonTema(); document.dispatchEvent(new CustomEvent("themechange")); }
+    });
+  }
+
+  /* Lee un color definido en css/styles.css (para los gráficos) */
+  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
   function toast(msg, type = "") {
     const t = document.createElement("div");
@@ -87,5 +121,5 @@ CampusCO2.ui = (function () {
 
   document.addEventListener("DOMContentLoaded", renderLayout);
 
-  return { $, esc, fmt, fmtCO2, toast, fillSelect, apiErrorBox, PALETTE, PAGES };
+  return { $, esc, fmt, fmtCO2, toast, fillSelect, apiErrorBox, PALETTE, PAGES, cssVar, setTheme };
 })();

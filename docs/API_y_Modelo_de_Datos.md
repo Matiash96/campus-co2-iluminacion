@@ -14,7 +14,7 @@
 
 | Aspecto | Definición |
 |---|---|
-| Qué se mide | Emisiones de GEI (CO₂e) por el consumo eléctrico de la iluminación de cada edificio, por sector y por tecnología de luminaria |
+| Qué se mide | Emisiones de GEI (CO₂e) por el consumo eléctrico de la iluminación de cada edificio, por tipo y tecnología de luminaria |
 | Alcance | **Alcance 2**: electricidad comprada a la red, con el método basado en ubicación (GHG Protocol / ISO 14064-1). Los recambios a LED se informan como **emisiones evitadas**, por separado |
 | Periodicidad | **Anual**: un período equivale a un año calendario |
 | Variables | Cantidad de luminarias, potencia unitaria, horas de uso, días de uso, simultaneidad y factor de emisión de la red |
@@ -84,25 +84,24 @@ flowchart LR
 | 1 | GET | `/health` | Probar la conexión | — |
 | 2 | GET | `/universidades` | Mostrar la universidad | UNIVERSIDADES |
 | 3 | GET | `/edificios?id_universidad={id}` | Selector de edificio | EDIFICIOS |
-| 4 | GET | `/edificios/{id_edificio}/sectores` | Selector de sector, superficie | SECTORES ⭐ |
-| 5 | GET | `/periodos` | Selector de período anual | PERIODOS |
-| 6 | GET | `/dimensiones?codigo=INFRA_ILUMINACION` | Obtener `id_dimension` | DIMENSIONES |
-| 7 | GET | `/unidades` | Unidad del dato de actividad (kWh) | UNIDADES |
-| 8 | GET | `/fuentes-datos` | Selector de fuente del dato | FUENTES_DATOS |
-| 9 | GET | `/factores-emision?id_periodo={id}&categoria=electricidad_red` | **Consultar el factor de emisión** | FACTORES_EMISION |
-| 10 | GET | `/tipos-luminaria` | Catálogo de luminarias y potencias de referencia | TIPOS_LUMINARIA ⭐ |
-| 11 | GET | `/datos-actividad?id_dimension=4&id_periodo=&id_edificio=` | Listar relevamientos | DATOS_ACTIVIDAD + DETALLE_ILUMINACION |
-| 12 | POST | `/datos-actividad` | **Enviar un dato relevado** | DATOS_ACTIVIDAD + DETALLE_ILUMINACION |
-| 13 | PUT | `/datos-actividad/{id_actividad}` | Corregir un dato | ídem |
-| 14 | DELETE | `/datos-actividad/{id_actividad}` | Eliminar un dato | ídem |
-| 15 | GET | `/resultados-emisiones?id_dimension=4&id_periodo=` | Tablero y estado de cálculo | RESULTADOS_EMISIONES |
-| 16 | POST | `/resultados-emisiones` | **Enviar el cálculo con su trazabilidad** | RESULTADOS_EMISIONES |
-| 17 | GET | `/proyectos-mitigacion?id_dimension=4` | Listar proyectos LED | PROYECTOS_MITIGACION |
-| 18 | POST | `/proyectos-mitigacion` | Registrar un proyecto | PROYECTOS_MITIGACION |
-| 19 | GET | `/emisiones-evitadas?id_proyecto=&id_periodo=` | KPI de emisiones evitadas | EMISIONES_EVITADAS |
-| 20 | POST | `/emisiones-evitadas` | Enviar las emisiones evitadas calculadas | EMISIONES_EVITADAS |
+| 4 | GET | `/periodos` | Selector de período anual | PERIODOS |
+| 5 | GET | `/dimensiones?codigo=INFRA_ILUMINACION` | Obtener `id_dimension` | DIMENSIONES |
+| 6 | GET | `/unidades` | Unidad del dato de actividad (kWh) | UNIDADES |
+| 7 | GET | `/fuentes-datos` | Selector de fuente del dato | FUENTES_DATOS |
+| 8 | GET | `/factores-emision?id_periodo={id}&categoria=electricidad_red` | **Consultar el factor de emisión** | FACTORES_EMISION |
+| 9 | GET | `/tipos-luminaria` | Catálogo de luminarias y potencias de referencia | TIPOS_LUMINARIA ⭐ |
+| 10 | GET | `/datos-actividad?id_dimension=4&id_periodo=&id_edificio=` | Listar relevamientos | DATOS_ACTIVIDAD + DETALLE_ILUMINACION |
+| 11 | POST | `/datos-actividad` | **Enviar un dato relevado** | DATOS_ACTIVIDAD + DETALLE_ILUMINACION |
+| 12 | PUT | `/datos-actividad/{id_actividad}` | Corregir un dato | ídem |
+| 13 | DELETE | `/datos-actividad/{id_actividad}` | Eliminar un dato | ídem |
+| 14 | GET | `/resultados-emisiones?id_dimension=4&id_periodo=` | Tablero y estado de cálculo | RESULTADOS_EMISIONES |
+| 15 | POST | `/resultados-emisiones` | **Enviar el cálculo con su trazabilidad** | RESULTADOS_EMISIONES |
+| 16 | GET | `/proyectos-mitigacion?id_dimension=4` | Listar proyectos LED | PROYECTOS_MITIGACION |
+| 17 | POST | `/proyectos-mitigacion` | Registrar un proyecto | PROYECTOS_MITIGACION |
+| 18 | GET | `/emisiones-evitadas?id_proyecto=&id_periodo=` | KPI de emisiones evitadas | EMISIONES_EVITADAS |
+| 19 | POST | `/emisiones-evitadas` | Enviar las emisiones evitadas calculadas | EMISIONES_EVITADAS |
 
-⭐ Catálogos propios de la dimensión 4. Pedimos que la cátedra los aloje en la base central, o que indique cómo modelarlos con sus entidades genéricas.
+⭐ Catálogo propio de la dimensión 4. Pedimos que la cátedra los aloje en la base central, o que indique cómo modelarlos con sus entidades genéricas.
 
 ### 4.2 Catálogos (solo lectura)
 
@@ -111,15 +110,6 @@ flowchart LR
 ```json
 [
   { "id_edificio": 1, "id_universidad": 1, "nombre": "Edificio Central", "direccion": "Maestro M. López esq. Cruz Roja Argentina" }
-]
-```
-
-#### `GET /edificios/{id_edificio}/sectores`
-
-```json
-[
-  { "id_sector": 1, "id_edificio": 1, "nombre": "Aulas planta baja", "tipo_espacio": "Aula", "superficie_m2": 320 },
-  { "id_sector": 10, "id_edificio": 1, "nombre": "Iluminación exterior / perímetro", "tipo_espacio": "Exterior", "superficie_m2": null }
 ]
 ```
 
@@ -199,9 +189,7 @@ El registro sigue la estructura **genérica** de la entidad central (`valor` + `
   "valor": 259.2,
   "descripcion": "Plafón LED circular – Depósito",
   "detalle_iluminacion": {
-    "id_sector": 7,
     "id_tipo_luminaria": 4,
-    "tipo_actividad": "Iluminación interior",
     "cantidad": 12,
     "potencia_unitaria": 18,
     "unidad_potencia": "W",
@@ -222,7 +210,7 @@ Validaciones que hace el frontend (sugerimos repetirlas en la API):
 
 | Campo | Regla |
 |---|---|
-| `id_edificio`, `id_periodo`, `id_fuente`, `id_sector`, `id_tipo_luminaria` | Obligatorios y existentes. El sector debe pertenecer al edificio |
+| `id_edificio`, `id_periodo`, `id_fuente`, `id_tipo_luminaria` | Obligatorios y existentes |
 | `cantidad` | Entero entre 1 y 10.000 |
 | `potencia_unitaria` + `unidad_potencia` | Entre 0,5 W y 2.000 W después de convertir. `unidad_potencia` ∈ {`W`, `kW`} |
 | `horas_uso` | Entre 0,5 y 24 si `unidad_tiempo = "h/día"`. Entre 1 y 8.760/8.784 si es `"h/año"` |
@@ -263,7 +251,7 @@ Devuelve un arreglo de objetos como los del POST, con `id_actividad`, `created_a
     "metodo": "Alcance 2 – basado en ubicación (GHG Protocol Scope 2 Guidance)",
     "formula_general": "E [kgCO2e] = (cantidad × P_unitaria[W] ÷ 1000) × horas_año × simultaneidad × FE [kgCO2e/kWh]",
     "entradas": {
-      "edificio": "Biblioteca", "sector": "Depósito", "periodo": 2026, "tipo_luminaria": "Plafón LED circular",
+      "edificio": "Biblioteca", "periodo": 2026, "tipo_luminaria": "Plafón LED circular",
       "cantidad": 12, "potencia_unitaria": 18, "unidad_potencia": "W",
       "horas_uso": 6, "unidad_tiempo": "h/día", "dias_anio": 200, "factor_simultaneidad": 100
     },
@@ -357,9 +345,8 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 
 | Entidad | Atributos |
 |---|---|
-| SECTORES | **id_sector**, *id_edificio*, nombre, tipo_espacio, superficie_m2 |
 | TIPOS_LUMINARIA | **id_tipo_luminaria**, nombre, tecnologia, potencia_referencia_w, eficiente |
-| DETALLE_ILUMINACION | **_id_actividad_** (PK y FK), *id_sector*, *id_tipo_luminaria*, tipo_actividad, cantidad, potencia_unitaria, unidad_potencia, horas_uso, unidad_tiempo, dias_anio, factor_simultaneidad, fecha_relevamiento, responsable, observaciones |
+| DETALLE_ILUMINACION | **_id_actividad_** (PK y FK), *id_tipo_luminaria*, cantidad, potencia_unitaria, unidad_potencia, horas_uso, unidad_tiempo, dias_anio, factor_simultaneidad, fecha_relevamiento, responsable, observaciones |
 
 **negrita** = clave primaria · *cursiva* = clave foránea
 
@@ -368,14 +355,12 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 | Relación | Cardinalidad | Descripción |
 |---|---|---|
 | UNIVERSIDADES → EDIFICIOS | 1 : N | Una universidad tiene muchos edificios |
-| EDIFICIOS → SECTORES ⭐ | 1 : N | Cada edificio se divide en sectores o espacios con superficie (necesario para W/m² y kgCO₂e/m²) |
 | EDIFICIOS → DATOS_ACTIVIDAD | 1 : N | Los relevamientos se imputan a un edificio |
 | PERIODOS → DATOS_ACTIVIDAD | 1 : N | Cada dato pertenece a un año |
 | DIMENSIONES → DATOS_ACTIVIDAD | 1 : N | Se filtra por `INFRA_ILUMINACION` |
 | UNIDADES → DATOS_ACTIVIDAD | 1 : N | `valor` se expresa en kWh |
 | FUENTES_DATOS → DATOS_ACTIVIDAD | 1 : N | Origen y calidad del dato |
 | **DATOS_ACTIVIDAD → DETALLE_ILUMINACION** ⭐ | **1 : 0..1** | Extensión con las variables propias de la iluminación |
-| SECTORES → DETALLE_ILUMINACION ⭐ | 1 : N | Sector relevado |
 | TIPOS_LUMINARIA → DETALLE_ILUMINACION ⭐ | 1 : N | Tecnología y potencia de referencia |
 | PERIODOS / FUENTES_DATOS / UNIDADES → FACTORES_EMISION | 1 : N | Un factor por año, con su fuente y su unidad |
 | DATOS_ACTIVIDAD → RESULTADOS_EMISIONES | 1 : N | Historial de cálculos (versionado) |
@@ -385,16 +370,6 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 | PERIODOS / FACTORES_EMISION → EMISIONES_EVITADAS | 1 : N | Año y factor aplicados |
 
 ### 5.3 Diccionario de datos
-
-#### SECTORES ⭐
-
-| Campo | Tipo | Nulo | Descripción | Ejemplo / validación |
-|---|---|---|---|---|
-| id_sector | INTEGER PK | No | Identificador del sector | 1 |
-| id_edificio | INTEGER FK → EDIFICIOS | No | Edificio al que pertenece | 1 |
-| nombre | VARCHAR(100) | No | Nombre del espacio | "Aulas planta baja" |
-| tipo_espacio | VARCHAR(40) | No | Clasificación de uso | Aula, Oficina, Circulación, Laboratorio, Biblioteca, Depósito, Exterior |
-| superficie_m2 | DECIMAL(10,2) | Sí | Superficie útil iluminada (es `null` en espacios exteriores) | > 0 |
 
 #### TIPOS_LUMINARIA ⭐
 
@@ -425,9 +400,7 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 | Campo | Tipo | Nulo | Descripción | Ejemplo / validación |
 |---|---|---|---|---|
 | id_actividad | INTEGER PK, FK → DATOS_ACTIVIDAD | No | Relación 1:1 con el dato de actividad | 41 |
-| id_sector | INTEGER FK → SECTORES | No | Sector relevado (del mismo edificio) | 7 |
 | id_tipo_luminaria | INTEGER FK → TIPOS_LUMINARIA | No | Tipo de luminaria | 4 |
-| tipo_actividad | VARCHAR(40) | No | Clase de iluminación | Interior, Exterior, Emergencia |
 | cantidad | INTEGER | No | Luminarias instaladas | 1 – 10.000 |
 | potencia_unitaria | DECIMAL(10,3) | No | Potencia por luminaria, en la unidad cargada | 18 |
 | unidad_potencia | VARCHAR(5) → UNIDADES.simbolo | No | Unidad de la potencia | W, kW |
@@ -486,19 +459,17 @@ Las entidades UNIVERSIDADES, EDIFICIOS, PERIODOS, DIMENSIONES, UNIDADES y FUENTE
 
 ### 5.4 Diagrama entidad-relación
 
-El diagrama editable está en [`mapa_entidad_relacion_iluminacion_v2.drawio`](mapa_entidad_relacion_iluminacion_v2.drawio). Para verlo, abrirlo en app.diagrams.net con *Archivo → Abrir desde → Dispositivo*. Colores del diagrama: azul para las entidades centrales, verde para las propias de la dimensión y naranja para mitigación.
+El diagrama editable está en [`mapa_entidad_relacion_iluminacion_v3.drawio`](mapa_entidad_relacion_iluminacion_v3.drawio). Para verlo, abrirlo en app.diagrams.net con *Archivo → Abrir desde → Dispositivo*. Colores del diagrama: azul para las entidades centrales, verde para las propias de la dimensión y naranja para mitigación.
 
 ```mermaid
 erDiagram
   UNIVERSIDADES ||--o{ EDIFICIOS : tiene
-  EDIFICIOS ||--o{ SECTORES : "se divide en"
   EDIFICIOS ||--o{ DATOS_ACTIVIDAD : registra
   PERIODOS ||--o{ DATOS_ACTIVIDAD : agrupa
   DIMENSIONES ||--o{ DATOS_ACTIVIDAD : clasifica
   UNIDADES ||--o{ DATOS_ACTIVIDAD : mide
   FUENTES_DATOS ||--o{ DATOS_ACTIVIDAD : origina
   DATOS_ACTIVIDAD ||--o| DETALLE_ILUMINACION : extiende
-  SECTORES ||--o{ DETALLE_ILUMINACION : ubica
   TIPOS_LUMINARIA ||--o{ DETALLE_ILUMINACION : describe
   PERIODOS ||--o{ FACTORES_EMISION : vigencia
   FUENTES_DATOS ||--o{ FACTORES_EMISION : publica
@@ -521,13 +492,6 @@ erDiagram
     int id_universidad FK
     string nombre
     string direccion
-  }
-  SECTORES {
-    int id_sector PK
-    int id_edificio FK
-    string nombre
-    string tipo_espacio
-    decimal superficie_m2
   }
   PERIODOS {
     int id_periodo PK
@@ -574,9 +538,7 @@ erDiagram
   }
   DETALLE_ILUMINACION {
     int id_actividad PK,FK
-    int id_sector FK
     int id_tipo_luminaria FK
-    string tipo_actividad
     int cantidad
     decimal potencia_unitaria
     string unidad_potencia
@@ -636,7 +598,7 @@ erDiagram
 
 | Cambio | Motivo |
 |---|---|
-| Nueva entidad **SECTORES** (FK a EDIFICIOS, con `superficie_m2`) | El análisis es *por edificio* y por espacio. La superficie permite calcular W/m² y kgCO₂e/m² |
+| Se quitan SECTORES, `id_sector` y `tipo_actividad` (versión del 21/10/2026) | El relevamiento se registra por edificio, sin desagregar por espacio ni por clase de iluminación |
 | Datos propios de iluminación (`cantidad`, `potencia`, `horas`, tipo de luminaria) movidos de DATOS_ACTIVIDAD a **DETALLE_ILUMINACION** (1:1) | DATOS_ACTIVIDAD es central y compartida por las 15 dimensiones, así que debe quedar genérica (`valor` + `id_unidad`) |
 | Se agregan `dias_anio`, `unidad_tiempo`, `unidad_potencia`, `factor_simultaneidad`, `fecha_relevamiento` y `responsable` | Sin los días de uso no se puede calcular el consumo anual. Los demás campos permiten convertir unidades y dan trazabilidad |
 | TIPOS_LUMINARIA suma `tecnologia` y `eficiente` | Indicador de % LED y detección de oportunidades de recambio |
@@ -653,7 +615,7 @@ erDiagram
 1. La URL base y el mecanismo de autenticación de la API común.
 2. Que confirme las rutas (o las cambie) y el formato de listas: arreglo o `{data: [...]}`.
 3. Que cargue el **factor de emisión oficial de la red eléctrica argentina** por año (categoría `electricidad_red`), con su fuente.
-4. Que aloje las entidades SECTORES, TIPOS_LUMINARIA y DETALLE_ILUMINACION, o que indique cómo representarlas en el modelo central.
+4. Que aloje las entidades TIPOS_LUMINARIA y DETALLE_ILUMINACION, o que indique cómo representarlas en el modelo central.
 5. Que habilite CORS para el origen del frontend.
 
 > **Nota:** los edificios, cantidades, potencias y factores que se ven en el modo demostración son **ilustrativos**. No son datos oficiales de la Facultad.

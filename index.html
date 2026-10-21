@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inicio · Campus CO₂ Iluminación</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-page="inicio" data-title="Resumen de iluminación por edificio">
   <aside id="app-sidebar"></aside>
@@ -39,7 +40,7 @@
 
     <div class="section-heading"><div><h2>Flujo del módulo</h2><p>Los cuatro componentes funcionales pedidos por la consigna.</p></div></div>
     <div class="flow">
-      <a class="flow-step" href="carga.html"><span class="step">01</span><b>Carga de datos</b><small>Edificio, sector, período, tipo de luminaria, potencia, horas de uso y fuente del dato, con validaciones.</small></a>
+      <a class="flow-step" href="carga.html"><span class="step">01</span><b>Carga de datos</b><small>Edificio, período, tipo de luminaria, potencia, horas de uso y fuente del dato, con validaciones.</small></a>
       <a class="flow-step" href="configuracion.html"><span class="step">02</span><b>Integración con la API</b><small>Consulta catálogos y factores de emisión; envía datos de actividad y resultados.</small></a>
       <a class="flow-step" href="calculo.html"><span class="step">03</span><b>Cálculo y trazabilidad</b><small>Conversión de unidades, aplicación del FE y detalle paso a paso de cada resultado.</small></a>
       <a class="flow-step" href="visualizacion.html"><span class="step">04</span><b>Visualización</b><small>Indicadores, evolución temporal, comparaciones entre edificios y distribución.</small></a>
@@ -49,7 +50,7 @@
       <article class="panel">
         <div class="panel-head"><div><h3>Accesos rápidos</h3><p>Continuá con una tarea del módulo.</p></div></div>
         <div class="quick-list">
-          <a class="quick-link" href="carga.html"><span class="quick-icon blue">＋</span><span><b>Registrar luminarias</b><small>Nuevo dato de actividad para un sector de un edificio.</small></span><strong>→</strong></a>
+          <a class="quick-link" href="carga.html"><span class="quick-icon blue">＋</span><span><b>Registrar luminarias</b><small>Nuevo dato de actividad para un edificio.</small></span><strong>→</strong></a>
           <a class="quick-link" href="calculo.html"><span class="quick-icon gold">∑</span><span><b>Calcular pendientes</b><small id="k-pend">Datos de actividad sin resultado de emisiones.</small></span><strong>→</strong></a>
           <a class="quick-link" href="visualizacion.html"><span class="quick-icon green">▥</span><span><b>Ver tablero</b><small>Comparar edificios y períodos.</small></span><strong>→</strong></a>
           <a class="quick-link" href="mitigacion.html"><span class="quick-icon violet">↘</span><span><b>Evaluar recambio LED</b><small>Calcular emisiones evitadas de un proyecto.</small></span><strong>→</strong></a>

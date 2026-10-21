@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("op-table").innerHTML = filas.map((f) => {
       const nuevo = sugerido(f.tipo);
       const ahorro = f.kwh * (1 - nuevo.potencia_referencia_w / calc.convertir(f.det.potencia_unitaria, f.det.unidad_potencia || "W", "W"));
-      return `<tr><td><b>${esc(f.edificio)}</b><br><small>${esc(f.sector.nombre)}</small></td><td>${esc(f.tipo.nombre)}</td>
+      return `<tr><td><b>${esc(f.edificio)}</b><br><small>Período ${esc(f.anio)}</small></td><td>${esc(f.tipo.nombre)}</td>
         <td class="num">${fmt(f.cantidad, 0)}</td><td class="num">${fmt(f.kwh, 0)} kWh</td><td>${esc(nuevo.nombre)}</td>
         <td class="num">${ahorro > 0 ? `${fmt(ahorro, 0)} kWh` : "–"}</td>
         <td><button class="btn btn-outline btn-sm" data-use="${f.actividad.id_actividad}">Usar</button></td></tr>`;
@@ -60,8 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const d = a.detalle_iluminacion;
     const tipo = ctx.tipoPorId[d.id_tipo_luminaria];
     const nuevo = sugerido(tipo);
-    const sector = ctx.sectorPorId[d.id_sector];
-    $("nombre").value = `Recambio LED – ${sector.nombre} (${ctx.edificioPorId[a.id_edificio].nombre})`;
+    $("nombre").value = `Recambio LED – ${tipo.nombre} (${ctx.edificioPorId[a.id_edificio].nombre})`;
     $("id_edificio").value = a.id_edificio;
     $("id_periodo").value = a.id_periodo;
     $("tipo_base").value = tipo.id_tipo_luminaria;

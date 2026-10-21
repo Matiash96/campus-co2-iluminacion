@@ -109,13 +109,7 @@ CampusCO2.api = (function () {
       return f;
     },
 
-    // Catálogos de la dimensión
-    getSectores: (id_edificio) => request("sectores", { pathParams: { id_edificio } }),
-    async getTodosLosSectores() {
-      const eds = await this.getEdificios();
-      const listas = await Promise.all(eds.map((e) => this.getSectores(e.id_edificio)));
-      return listas.flat();
-    },
+    // Catálogo de la dimensión
     getTiposLuminaria: () => cached("tipos", () => request("tiposLuminaria")),
 
     // Datos de actividad

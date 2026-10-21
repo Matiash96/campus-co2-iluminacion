@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carga de datos · Campus CO₂ Iluminación</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
 <body data-page="carga" data-title="Carga de datos de iluminación">
   <aside id="app-sidebar"></aside>
@@ -12,27 +13,18 @@
     <header id="app-topbar"></header>
 
     <div class="section-heading">
-      <div><h2 id="form-title">Nuevo dato de actividad</h2><p>Relevamiento anual de luminarias por edificio y sector. Se envía a <code>POST /datos-actividad</code>.</p></div>
+      <div><h2 id="form-title">Nuevo dato de actividad</h2><p>Relevamiento anual de luminarias por edificio. Se envía a <code>POST /datos-actividad</code>.</p></div>
       <span class="required-note"><span style="color:#d35454">*</span> Campos obligatorios</span>
     </div>
 
     <form id="activity-form" class="panel form-panel" novalidate>
       <input type="hidden" id="id_actividad">
 
-      <div class="form-section-title"><span class="step">01</span><div><h3>Ubicación, período y actividad</h3><p>Dónde y cuándo se relevó el dato.</p></div></div>
+      <div class="form-section-title"><span class="step">01</span><div><h3>Ubicación y período</h3><p>Edificio y año del relevamiento.</p></div></div>
       <div class="form-grid">
         <label class="field">Universidad<input id="universidad" readonly></label>
         <label class="field"><span class="lbl">Edificio <span class="req">*</span></span><select id="id_edificio" required></select><span class="error-text">Seleccioná un edificio.</span></label>
-        <label class="field"><span class="lbl">Sector / espacio <span class="req">*</span></span><select id="id_sector" required></select><span class="error-text">Seleccioná un sector del edificio.</span><small id="sector-info"></small></label>
         <label class="field"><span class="lbl">Período (anual) <span class="req">*</span></span><select id="id_periodo" required></select><span class="error-text">Seleccioná un período.</span><small id="periodo-info"></small></label>
-        <label class="field">Dimensión<input id="dimension" readonly></label>
-        <label class="field"><span class="lbl">Actividad <span class="req">*</span></span>
-          <select id="tipo_actividad" required>
-            <option>Iluminación interior</option>
-            <option>Iluminación exterior</option>
-            <option>Iluminación de emergencia</option>
-          </select>
-        </label>
       </div>
 
       <div class="form-section-title separated"><span class="step">02</span><div><h3>Luminarias</h3><p>Al elegir el tipo se propone su potencia de referencia; podés corregirla con el dato de placa.</p></div></div>
@@ -93,7 +85,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Edificio / sector</th><th>Tipo de luminaria</th><th class="num">Cant.</th><th class="num">Potencia</th><th class="num">Horas/año</th><th class="num">Consumo</th><th>Fuente</th><th>Estado</th><th></th></tr></thead>
+          <thead><tr><th>Edificio / período</th><th>Tipo de luminaria</th><th class="num">Cant.</th><th class="num">Potencia</th><th class="num">Horas/año</th><th class="num">Consumo</th><th>Fuente</th><th>Estado</th><th></th></tr></thead>
           <tbody id="activity-table"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody>
         </table>
       </div>

@@ -137,7 +137,6 @@ CampusCO2.calculo = (function () {
         formula_general: "E [kgCO2e] = (cantidad × P_unitaria[W] ÷ 1000) × horas_año × simultaneidad × FE [kgCO2e/kWh]",
         entradas: {
           edificio: contexto.edificio || null,
-          sector: contexto.sector || null,
           periodo: contexto.periodo || null,
           tipo_luminaria: contexto.tipo_luminaria || null,
           cantidad: Number(det.cantidad),

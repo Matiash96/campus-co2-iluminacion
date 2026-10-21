@@ -1,17 +1,17 @@
 # Modelo de datos – Iluminación por edificio (Campus CO₂)
 
-19/10/2026 · Matias
+21/10/2026 · Matias
 
-El módulo de la dimensión 4 (Infraestructura y edificios: análisis de iluminación por edificio) usa 11 entidades centrales de la base de la cátedra y agrega 3 entidades propias. No crea una base de datos propia: las 3 entidades nuevas se proponen para que la cátedra las aloje en la base central.
+El módulo de la dimensión 4 (Infraestructura y edificios: análisis de iluminación por edificio) usa 11 entidades centrales de la base de la cátedra y agrega 2 entidades propias. No crea una base de datos propia: las 2 entidades nuevas se proponen para que la cátedra las aloje en la base central.
 
 - **Entidades centrales:** las define la cátedra y las comparten las 15 dimensiones. El módulo las consume a través de la API REST común.
-- **Entidades propias de la dimensión 4:** SECTORES, TIPOS_LUMINARIA y DETALLE_ILUMINACION. Guardan los datos que solo necesita el análisis de iluminación.
+- **Entidades propias de la dimensión 4:** TIPOS_LUMINARIA y DETALLE_ILUMINACION. Guardan los datos que solo necesita el análisis de iluminación.
 - **Notación:** PK = clave primaria, FK = clave foránea. Los nombres siguen `snake_case`, igual que el JSON de la API.
-- **Diagrama entidad-relación:** archivo `mapa_entidad_relacion_iluminacion_v2.drawio` (Google Drive y carpeta `docs/` del proyecto).
+- **Diagrama entidad-relación:** archivo `mapa_entidad_relacion_iluminacion_v3.drawio` (Google Drive y carpeta `docs/` del proyecto).
 
 ## Entidades y atributos
 
-Son 14 entidades: 11 centrales y 3 propias de la dimensión 4. DETALLE_ILUMINACION es una extensión 1:1 de DATOS_ACTIVIDAD, así la entidad central queda genérica (`valor` + `id_unidad`) para todas las dimensiones.
+Son 13 entidades: 11 centrales y 2 propias de la dimensión 4. DETALLE_ILUMINACION es una extensión 1:1 de DATOS_ACTIVIDAD, así la entidad central queda genérica (`valor` + `id_unidad`) para todas las dimensiones.
 
 | Entidad | Origen | Clave primaria | Claves foráneas | Otros atributos |
 | --- | --- | --- | --- | --- |
@@ -26,19 +26,16 @@ Son 14 entidades: 11 centrales y 3 propias de la dimensión 4. DETALLE_ILUMINACI
 | RESULTADOS_EMISIONES | Central | id_resultado | id_actividad, id_factor | alcance, consumo_kwh, emisiones_kg_co2e, emisiones_t_co2e, fecha_calculo, version_metodologia, trazabilidad |
 | PROYECTOS_MITIGACION | Central | id_proyecto | id_edificio, id_dimension | nombre, descripcion, tipo_medida, fecha_inicio, estado |
 | EMISIONES_EVITADAS | Central | id_emision_evitada | id_proyecto, id_periodo, id_factor | consumo_base_kwh, consumo_mejorado_kwh, kg_co2e_evitados, parametros, trazabilidad |
-| SECTORES | Dimensión 4 | id_sector | id_edificio | nombre, tipo_espacio, superficie_m2 |
 | TIPOS_LUMINARIA | Dimensión 4 | id_tipo_luminaria | — | nombre, tecnologia, potencia_referencia_w, eficiente |
-| DETALLE_ILUMINACION | Dimensión 4 | id_actividad (también FK) | id_actividad, id_sector, id_tipo_luminaria | tipo_actividad, cantidad, potencia_unitaria, unidad_potencia, horas_uso, unidad_tiempo, dias_anio, factor_simultaneidad, fecha_relevamiento, responsable, observaciones |
+| DETALLE_ILUMINACION | Dimensión 4 | id_actividad (también FK) | id_actividad, id_tipo_luminaria | cantidad, potencia_unitaria, unidad_potencia, horas_uso, unidad_tiempo, dias_anio, factor_simultaneidad, fecha_relevamiento, responsable, observaciones |
 
 ## Relaciones con las entidades centrales
 
-Las 3 entidades propias se cuelgan de dos entidades centrales: SECTORES de EDIFICIOS y DETALLE_ILUMINACION de DATOS_ACTIVIDAD. El resto del cálculo (factor, resultado, emisiones evitadas) usa solo entidades centrales.
+Las 2 entidades propias se cuelgan de una entidad central: DETALLE_ILUMINACION extiende a DATOS_ACTIVIDAD, y TIPOS_LUMINARIA es el catálogo de ese detalle. El edificio se toma de DATOS_ACTIVIDAD. El resto del cálculo (factor, resultado, emisiones evitadas) usa solo entidades centrales.
 
 | Entidad padre (1) | Entidad hija (N) | Cardinalidad | Qué representa |
 | --- | --- | --- | --- |
-| EDIFICIOS | SECTORES | 1 : N | Cada edificio se divide en sectores con superficie; permite calcular W/m² y kgCO₂e/m² |
 | DATOS_ACTIVIDAD | DETALLE_ILUMINACION | 1 : 0..1 | Extensión con las variables propias de la iluminación |
-| SECTORES | DETALLE_ILUMINACION | 1 : N | Sector donde se relevaron las luminarias |
 | TIPOS_LUMINARIA | DETALLE_ILUMINACION | 1 : N | Tecnología y potencia de referencia de la luminaria |
 | UNIVERSIDADES | EDIFICIOS | 1 : N | Edificios de la UTN FRC |
 | EDIFICIOS | DATOS_ACTIVIDAD | 1 : N | El relevamiento se imputa a un edificio |
@@ -61,16 +58,6 @@ Las 3 entidades propias se cuelgan de dos entidades centrales: SECTORES de EDIFI
 
 Una tabla por entidad, en el orden en que se usan al cargar y calcular. Los tipos son SQL de referencia; la cátedra puede ajustarlos a su motor.
 
-### SECTORES (dimensión 4)
-
-| Campo | Tipo | Nulo | Descripción | Ejemplo / validación |
-| --- | --- | --- | --- | --- |
-| id_sector | INTEGER PK | No | Identificador del sector | 1 |
-| id_edificio | INTEGER FK → EDIFICIOS | No | Edificio al que pertenece | 1 |
-| nombre | VARCHAR(100) | No | Nombre del espacio | Aulas planta baja |
-| tipo_espacio | VARCHAR(40) | No | Clasificación de uso | Aula, Oficina, Circulación, Laboratorio, Biblioteca, Depósito, Exterior |
-| superficie_m2 | DECIMAL(10,2) | Sí | Superficie útil iluminada; nula en exteriores | Mayor que 0 |
-
 ### TIPOS_LUMINARIA (dimensión 4)
 
 | Campo | Tipo | Nulo | Descripción | Ejemplo / validación |
@@ -86,9 +73,7 @@ Una tabla por entidad, en el orden en que se usan al cargar y calcular. Los tipo
 | Campo | Tipo | Nulo | Descripción | Ejemplo / validación |
 | --- | --- | --- | --- | --- |
 | id_actividad | INTEGER PK, FK → DATOS_ACTIVIDAD | No | Relación 1:1 con el dato de actividad | 41 |
-| id_sector | INTEGER FK → SECTORES | No | Sector relevado | Debe pertenecer al mismo edificio |
 | id_tipo_luminaria | INTEGER FK → TIPOS_LUMINARIA | No | Tipo de luminaria | 4 |
-| tipo_actividad | VARCHAR(40) | No | Clase de iluminación | Interior, Exterior, Emergencia |
 | cantidad | INTEGER | No | Luminarias instaladas | Entero de 1 a 10.000 |
 | potencia_unitaria | DECIMAL(10,3) | No | Potencia por luminaria, en la unidad cargada | Entre 0,5 W y 2.000 W una vez convertida |
 | unidad_potencia | VARCHAR(5) | No | Símbolo de UNIDADES | W o kW |

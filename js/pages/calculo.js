@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           (factor && f.resultado.id_factor !== factor.id_factor));
         return Object.assign(f, { estado: !f.resultado ? "pendiente" : desact ? "desactualizado" : "calculado" });
       })
-      .sort((a, b) => a.edificio.localeCompare(b.edificio) || (a.sector.nombre || "").localeCompare(b.sector.nombre || ""));
+      .sort((a, b) => a.edificio.localeCompare(b.edificio) || (a.tipo.nombre || "").localeCompare(b.tipo.nombre || ""));
   }
 
   function render() {
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     tbody.innerHTML = lista.map((f) => `
       <tr class="${seleccion === f.actividad.id_actividad ? "selected" : ""}">
         <td>${f.actividad.id_actividad}</td>
-        <td><b>${esc(f.edificio)}</b><br><small>${esc(f.sector.nombre || "")}</small></td>
+        <td><b>${esc(f.edificio)}</b><br><small>Período ${esc(f.anio)}</small></td>
         <td>${esc(f.tipo.nombre || "")}</td>
         <td class="num">${fmt(f.kwh, 1)} kWh</td>
         <td class="num">${f.kg == null ? "–" : showCO2(f.kg)}</td>
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function contexto(f) {
-    return { edificio: f.edificio, sector: f.sector.nombre, periodo: f.anio, tipo_luminaria: f.tipo.nombre };
+    return { edificio: f.edificio, periodo: f.anio, tipo_luminaria: f.tipo.nombre };
   }
 
   /* Payload enviado a POST /resultados-emisiones */
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       r = resultadoPayload(f); origen = "Vista previa: este cálculo todavía no fue enviado a la API.";
     } else { $("trace").innerHTML = '<div class="alert alert-err">No hay factor de emisión para el período.</div>'; return; }
     const tr = r.trazabilidad;
-    $("trace-sub").textContent = `Actividad #${idAct} · ${f.edificio} · ${f.sector.nombre || ""} · ${f.anio}. ${origen}`;
+    $("trace-sub").textContent = `Actividad #${idAct} · ${f.edificio} · ${f.anio}. ${origen}`;
     const ent = tr.entradas || {};
     $("trace").innerHTML = `
       <div class="grid-3">

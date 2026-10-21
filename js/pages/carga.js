@@ -15,13 +15,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     unidades = await api.getUnidades();
     const univ = (await api.getUniversidades()).find((u) => u.id_universidad === CampusCO2.config.get().idUniversidad);
     $("universidad").value = univ ? univ.nombre : "—";
-    $("dimension").value = `${ctx.dimension.nombre} – ${ctx.dimension.descripcion}`;
 
     fillSelect($("id_edificio"), ctx.edificios, "id_edificio", (e) => e.nombre, { placeholder: "Seleccionar…" });
     fillSelect($("id_periodo"), ctx.periodos.slice().reverse(), "id_periodo", (p) => `${p.anio}${p.estado === "cerrado" ? " (cerrado)" : ""}`, { placeholder: "Seleccionar…" });
     fillSelect($("id_tipo_luminaria"), ctx.tipos, "id_tipo_luminaria", (t) => `${t.nombre} · ${t.potencia_referencia_w} W`, { placeholder: "Seleccionar…" });
     fillSelect($("id_fuente"), ctx.fuentes.filter((f) => f.tipo !== "factor_emision"), "id_fuente", (f) => f.nombre, { placeholder: "Seleccionar…" });
-    fillSelect($("id_sector"), [], "id_sector", () => "", { placeholder: "Elegí primero el edificio" });
     fillSelect($("f-periodo"), ctx.periodos.slice().reverse(), "id_periodo", (p) => p.anio, { placeholder: "Todos" });
     fillSelect($("f-edificio"), ctx.edificios, "id_edificio", (e) => e.nombre, { placeholder: "Todos" });
 
@@ -52,18 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* ---------- Dependencias entre campos ---------- */
-  $("id_edificio").addEventListener("change", () => {
-    const sectores = ctx.sectores.filter((s) => String(s.id_edificio) === $("id_edificio").value);
-    fillSelect($("id_sector"), sectores, "id_sector", (s) => `${s.nombre} (${s.tipo_espacio})`, { placeholder: sectores.length ? "Seleccionar…" : "Sin sectores cargados" });
-    $("sector-info").textContent = "";
-    preview();
-  });
-  $("id_sector").addEventListener("change", () => {
-    const s = ctx.sectorPorId[$("id_sector").value];
-    $("sector-info").textContent = s ? (s.superficie_m2 ? `Superficie: ${fmt(s.superficie_m2, 0)} m²` : "Sin superficie (exterior)") : "";
-    if (s && s.tipo_espacio === "Exterior") $("tipo_actividad").value = "Iluminación exterior";
-    preview();
-  });
+  $("id_edificio").addEventListener("change", preview);
   $("id_tipo_luminaria").addEventListener("change", () => {
     const t = ctx.tipoPorId[$("id_tipo_luminaria").value];
     if (t) {
@@ -108,9 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---------- Lectura del formulario ---------- */
   function readDetalle() {
     return {
-      id_sector: Number($("id_sector").value) || null,
       id_tipo_luminaria: Number($("id_tipo_luminaria").value) || null,
-      tipo_actividad: $("tipo_actividad").value,
       cantidad: Number($("cantidad").value),
       potencia_unitaria: Number($("potencia_unitaria").value),
       unidad_potencia: $("unidad_potencia").value,
@@ -128,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const det = readDetalle();
     const kwhUnidad = unidades.find((u) => u.simbolo === "kWh");
     const tipo = ctx.tipoPorId[det.id_tipo_luminaria];
-    const sector = ctx.sectorPorId[det.id_sector];
+    const edificio = ctx.edificioPorId[$("id_edificio").value];
     let valor = null;
     try { valor = calc.calcularConsumo(det).kwh; } catch (e) { /* datos incompletos */ }
     return {
@@ -138,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       id_fuente: Number($("id_fuente").value) || null,
       id_unidad: kwhUnidad ? kwhUnidad.id_unidad : null,
       valor,
-      descripcion: tipo && sector ? `${tipo.nombre} – ${sector.nombre}` : null,
+      descripcion: tipo && edificio ? `${tipo.nombre} – ${edificio.nombre}` : null,
       detalle_iluminacion: det
     };
   }
@@ -163,9 +148,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function checkWarnings(payload) {
     const msgs = [];
     const det = payload.detalle_iluminacion;
-    const dup = actividades.find((a) => a.id_periodo === payload.id_periodo && a.detalle_iluminacion && a.detalle_iluminacion.id_sector === det.id_sector &&
+    const dup = actividades.find((a) => a.id_periodo === payload.id_periodo && a.id_edificio === payload.id_edificio && a.detalle_iluminacion &&
       a.detalle_iluminacion.id_tipo_luminaria === det.id_tipo_luminaria && String(a.id_actividad) !== $("id_actividad").value);
-    if (dup) msgs.push(`Ya existe un registro de este tipo de luminaria para el mismo sector y período (#${dup.id_actividad}). Si guardás, se sumará como un registro adicional.`);
+    if (dup) msgs.push(`Ya existe un registro de este tipo de luminaria para el mismo edificio y período (#${dup.id_actividad}). Si guardás, se sumará como un registro adicional.`);
     const t = ctx.tipoPorId[det.id_tipo_luminaria];
     if (t && det.potencia_unitaria > 0) {
       const w = calc.convertir(det.potencia_unitaria, det.unidad_potencia, "W");
@@ -185,8 +170,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const flag = (id, cond) => { if (setInvalid(id, cond)) errors++; };
 
     flag("id_edificio", !$("id_edificio").value);
-    const sector = ctx.sectorPorId[det.id_sector];
-    flag("id_sector", !sector || String(sector.id_edificio) !== $("id_edificio").value);
     flag("id_periodo", !periodo);
     flag("id_tipo_luminaria", !det.id_tipo_luminaria);
     flag("id_fuente", !$("id_fuente").value);
@@ -263,11 +246,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("btn-submit").innerHTML = "Actualizar (PUT) <span>→</span>";
     $("id_edificio").value = a.id_edificio;
     $("id_edificio").dispatchEvent(new Event("change"));
-    $("id_sector").value = d.id_sector;
-    $("id_sector").dispatchEvent(new Event("change"));
     $("id_periodo").value = a.id_periodo;
     $("id_tipo_luminaria").value = d.id_tipo_luminaria;
-    $("tipo_actividad").value = d.tipo_actividad || "Iluminación interior";
     $("potencia_unitaria").value = d.potencia_unitaria;
     $("unidad_potencia").value = d.unidad_potencia || "W";
     $("cantidad").value = d.cantidad;
@@ -308,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const estado = !f.resultado ? '<span class="badge warn">Pendiente de cálculo</span>' : desact ? '<span class="badge err">Recalcular</span>' : '<span class="badge ok">Calculado</span>';
       const horas = calc.horasAnuales(d).horas;
       return `<tr>
-        <td><b>${esc(f.edificio)}</b><br><small>${esc(f.sector.nombre || "")} · ${esc(f.anio)}</small></td>
+        <td><b>${esc(f.edificio)}</b><br><small>Período ${esc(f.anio)}</small></td>
         <td>${esc(f.tipo.nombre || "")}</td>
         <td class="num">${fmt(d.cantidad, 0)}</td>
         <td class="num">${fmt(d.potencia_unitaria, 1)} ${esc(d.unidad_potencia || "W")}</td>

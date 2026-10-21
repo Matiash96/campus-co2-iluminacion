@@ -44,7 +44,7 @@ CampusCO2.ui = (function () {
 
     $("app-sidebar").className = "sidebar";
     $("app-sidebar").innerHTML = `
-      <a class="brand" href="index.html"><div class="brand-mark">CO₂</div><div><strong>Campus CO₂</strong><small>UTN · Facultad Regional Córdoba</small></div></a>
+      <a class="brand" href="index.html" aria-label="Campus CO₂ – Inicio"><span class="brand-logo"><img src="img/greensoftware-logo.png" alt="Cátedra Green Software"></span><span class="brand-text"><strong>Campus CO₂</strong><small>UTN · Facultad Regional Córdoba</small></span></a>
       ${nav}
       <div class="sidebar-bottom">${modo}</div>`;
 

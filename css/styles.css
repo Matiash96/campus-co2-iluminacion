@@ -25,6 +25,11 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font
 /* ---------- Sidebar ---------- */
 .sidebar { width: 260px; background: var(--card); border-right: 1px solid var(--line); padding: 26px 17px; display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; z-index: 5; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 26px; text-decoration: none; color: inherit; }
+.brand { flex-direction: column; align-items: stretch; gap: 10px; }
+.brand-logo { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.brand-logo img { display: block; width: 100%; max-width: 190px; height: auto; margin: 0 auto; }
+.brand-text strong { display: block; font-size: 16px; letter-spacing: -.4px; }
+.brand-text small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
 .brand-mark { width: 43px; height: 43px; background: linear-gradient(145deg, #2b4f9b, #4e77d6); border-radius: 13px; color: #fff; display: grid; place-items: center; font-weight: 800; letter-spacing: -1px; flex-shrink: 0; }
 .brand strong { display: block; font-size: 16px; letter-spacing: -.4px; }
 .brand small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
@@ -253,7 +258,9 @@ tbody tr.selected td { background: var(--hover); }
 @media (max-width: 720px) {
   body { display: block; }
   .sidebar { position: relative; width: 100%; height: auto; padding: 14px 16px; display: block; border-right: 0; border-bottom: 1px solid var(--line); }
-  .brand { padding: 0 5px 12px; }
+  .brand { padding: 0 5px 12px; flex-direction: row; align-items: center; gap: 12px; }
+  .brand-logo { padding: 5px 8px; flex-shrink: 0; }
+  .brand-logo img { width: 110px; }
   .nav-label, .sidebar-bottom { display: none; }
   .sidebar nav { display: flex; overflow-x: auto; gap: 4px; }
   .nav-item { white-space: nowrap; padding: 8px 10px; font-size: 11px; }

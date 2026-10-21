@@ -5,7 +5,7 @@ Análisis de iluminación por edificio · UTN FRC · Cátedra Green Software
 Sitio multipágina (HTML + CSS + JavaScript, sin frameworks ni build).
 
 Publicado en: https://campus-co2-iluminacion.vercel.app
-(se actualiza solo con cada push a la rama main de GitHub)
+(deploy automático en Vercel: se actualiza solo con cada push a la rama main)
 Repositorio: https://github.com/Matiash96/campus-co2-iluminacion (privado)
 
 PÁGINAS

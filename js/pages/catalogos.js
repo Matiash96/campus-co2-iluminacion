@@ -17,8 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     history.replaceState(null, "", `#${tab}`);
   }
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => mostrarTab(b.dataset.tab)));
-  mostrarTab(location.hash === "#fuentes" ? "fuentes" : "tipos");
-  window.addEventListener("hashchange", () => mostrarTab(location.hash === "#fuentes" ? "fuentes" : "tipos"));
+  const TABS = ["universidades", "edificios", "tipos", "fuentes"];
+  const tabDeHash = () => (TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : TABS[0]);
+  mostrarTab(tabDeHash());
+  window.addEventListener("hashchange", () => mostrarTab(tabDeHash()));
 
   /* ---------- ABM genérico ---------- */
   function crearABM(cfg) {
@@ -63,7 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function validar(datos, id) {
       let errores = 0;
       const nombre = datos.nombre || "";
-      const repetido = registros.some((r) => String(r[cfg.idField]) !== String(id) && String(r.nombre).trim().toLowerCase() === nombre.toLowerCase());
+      const mismoAmbito = cfg.mismoAmbito || (() => true);
+      const repetido = registros.some((r) => String(r[cfg.idField]) !== String(id) && mismoAmbito(r, datos) && String(r.nombre).trim().toLowerCase() === nombre.toLowerCase());
       if (setInvalid(cfg.nombreInput, nombre.length < 3 || nombre.length > 100 || repetido,
         repetido ? "Ya existe un registro con ese nombre." : "Ingresá un nombre de 3 a 100 caracteres.")) errores++;
       errores += cfg.validar(datos, setInvalid);
@@ -90,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         toast(`${cfg.entidad} ${id ? "modificad" + o : "cread" + o}`, "ok");
         limpiar();
         await listar();
+        cfg.alCambiar && cfg.alCambiar();
       } catch (err) {
         msg.className = "form-message err";
         msg.textContent = `La API rechazó la operación: ${err.message}${err.status ? ` (HTTP ${err.status})` : ""}`;
@@ -121,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
           toast(`${cfg.entidad} eliminad${cfg.genero || "o"}`, "ok");
           if ($(cfg.idInput).value === String(r[cfg.idField])) limpiar();
           await listar();
+          cfg.alCambiar && cfg.alCambiar();
         } catch (err) {
           toast(err.status === 409 ? err.message : `No se pudo eliminar: ${err.message}`, "err");
         }
@@ -129,7 +134,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     limpiar();
     listar();
+    return { listar };
   }
+
+  /* ---------- UNIVERSIDADES ---------- */
+  let universidades = [];
+  async function cargarUniversidades() {
+    try { universidades = (await api.getUniversidades()) || []; } catch (e) { universidades = []; }
+    const sel = $("e-universidad"), actual = sel.value;
+    sel.innerHTML = '<option value="">Seleccionar…</option>' + universidades.map((u) => `<option value="${esc(u.id_universidad)}">${esc(u.nombre)}</option>`).join("");
+    sel.value = actual;
+  }
+  let abmEdificios = null;
+
+  crearABM({
+    entidad: "Universidad", genero: "a", idField: "id_universidad", columnas: 4,
+    form: "form-univ", idInput: "u-id", title: "u-title", submit: "u-submit", cancel: "u-cancel", msg: "u-msg", table: "u-table", count: "u-count",
+    nombreInput: "u-nombre", tituloAlta: "Nueva universidad", botonAlta: "Guardar universidad",
+    listar: () => api.getUniversidades(), crear: api.crearUniversidad, actualizar: api.actualizarUniversidad, eliminar: api.eliminarUniversidad,
+    // al cambiar universidades se refresca el selector y la tabla de edificios
+    alCambiar: async () => { await cargarUniversidades(); abmEdificios && abmEdificios.listar(); },
+    leer: () => ({ nombre: $("u-nombre").value.trim(), localidad: $("u-localidad").value.trim() }),
+    cargar: (r) => { $("u-nombre").value = r.nombre; $("u-localidad").value = r.localidad || ""; },
+    validar: (d, setInvalid) => Number(setInvalid("u-localidad", d.localidad.length < 2 || d.localidad.length > 80)),
+    fila: (r) => `<td><b>${esc(r.nombre)}</b></td><td>${esc(r.localidad || "—")}</td>`
+  });
+
+  /* ---------- EDIFICIOS ---------- */
+  const nombreUniversidad = (id) => (universidades.find((u) => String(u.id_universidad) === String(id)) || {}).nombre || `#${id}`;
+  abmEdificios = crearABM({
+    entidad: "Edificio", idField: "id_edificio", columnas: 5,
+    form: "form-edif", idInput: "e-id", title: "e-title", submit: "e-submit", cancel: "e-cancel", msg: "e-msg", table: "e-table", count: "e-count",
+    nombreInput: "e-nombre", tituloAlta: "Nuevo edificio", botonAlta: "Guardar edificio",
+    // el nombre solo no puede repetirse dentro de la misma universidad
+    mismoAmbito: (r, d) => String(r.id_universidad) === String(d.id_universidad),
+    listar: async () => { await cargarUniversidades(); return api.listarTodosLosEdificios(); },
+    crear: api.crearEdificio, actualizar: api.actualizarEdificio, eliminar: api.eliminarEdificio,
+    leer: () => ({ id_universidad: Number($("e-universidad").value) || null, nombre: $("e-nombre").value.trim(), direccion: $("e-direccion").value.trim() || null }),
+    cargar: (r) => { $("e-universidad").value = r.id_universidad; $("e-nombre").value = r.nombre; $("e-direccion").value = r.direccion || ""; },
+    validar: (d, setInvalid) =>
+      Number(setInvalid("e-universidad", !d.id_universidad)) +
+      Number(setInvalid("e-direccion", (d.direccion || "").length > 150)),
+    fila: (r) => `<td><b>${esc(r.nombre)}</b></td><td>${esc(nombreUniversidad(r.id_universidad))}</td><td style="white-space:normal">${esc(r.direccion || "—")}</td>`
+  });
 
   /* ---------- TIPOS_LUMINARIA ---------- */
   crearABM({

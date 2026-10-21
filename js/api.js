@@ -97,7 +97,14 @@ CampusCO2.api = (function () {
 
     // Catálogos centrales
     getUniversidades: () => cached("universidades", () => request("universidades")),
+    crearUniversidad: (payload) => request("crearUniversidad", { body: payload }).finally(() => invalidar("universidades")),
+    actualizarUniversidad: (id_universidad, payload) => request("actualizarUniversidad", { pathParams: { id_universidad }, body: payload }).finally(() => invalidar("universidades")),
+    eliminarUniversidad: (id_universidad) => request("eliminarUniversidad", { pathParams: { id_universidad } }).finally(() => invalidar("universidades")),
     getEdificios: () => cached("edificios", () => request("edificios", { query: { id_universidad: cfg().idUniversidad } })),
+    listarTodosLosEdificios: () => request("edificios"),
+    crearEdificio: (payload) => request("crearEdificio", { body: payload }).finally(() => invalidar("edificios")),
+    actualizarEdificio: (id_edificio, payload) => request("actualizarEdificio", { pathParams: { id_edificio }, body: payload }).finally(() => invalidar("edificios")),
+    eliminarEdificio: (id_edificio) => request("eliminarEdificio", { pathParams: { id_edificio } }).finally(() => invalidar("edificios")),
     getPeriodos: () => cached("periodos", async () => (await request("periodos")).sort((a, b) => a.anio - b.anio)),
     getDimension: idDim,
     getUnidades: () => cached("unidades", () => request("unidades")),

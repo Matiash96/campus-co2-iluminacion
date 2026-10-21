@@ -106,10 +106,20 @@ flowchart LR
 | 23 | POST | `/fuentes-datos` | ABM: alta de fuente de datos | FUENTES_DATOS |
 | 24 | PUT | `/fuentes-datos/{id_fuente}` | ABM: modificación | FUENTES_DATOS |
 | 25 | DELETE | `/fuentes-datos/{id_fuente}` | ABM: baja (`409` si está en uso) | FUENTES_DATOS |
+| 26 | POST | `/universidades` | ABM: alta de universidad | UNIVERSIDADES |
+| 27 | PUT | `/universidades/{id_universidad}` | ABM: modificación | UNIVERSIDADES |
+| 28 | DELETE | `/universidades/{id_universidad}` | ABM: baja (`409` si tiene edificios) | UNIVERSIDADES |
+| 29 | POST | `/edificios` | ABM: alta de edificio | EDIFICIOS |
+| 30 | PUT | `/edificios/{id_edificio}` | ABM: modificación | EDIFICIOS |
+| 31 | DELETE | `/edificios/{id_edificio}` | ABM: baja (`409` si está en uso) | EDIFICIOS |
+
+Los cuerpos y validaciones de los endpoints de ABM (20 a 31) están en `Endpoints_para_la_catedra.md`, sección 7.
+
+**Dimensión:** DIMENSIONES es la entidad central que separa los datos de los 15 grupos. El módulo siempre usa la dimensión 4 (`INFRA_ILUMINACION`): obtiene su `id_dimension` de la API y lo completa solo en cada envío. No es un campo del formulario de carga.
 
 ⭐ Catálogo propio de la dimensión 4. Pedimos que la cátedra los aloje en la base central, o que indique cómo modelarlos con sus entidades genéricas.
 
-### 4.2 Catálogos (solo lectura)
+### 4.2 Catálogos (consulta)
 
 #### `GET /edificios?id_universidad=1`
 
@@ -363,7 +373,7 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 | UNIVERSIDADES → EDIFICIOS | 1 : N | Una universidad tiene muchos edificios |
 | EDIFICIOS → DATOS_ACTIVIDAD | 1 : N | Los relevamientos se imputan a un edificio |
 | PERIODOS → DATOS_ACTIVIDAD | 1 : N | Cada dato pertenece a un año |
-| DIMENSIONES → DATOS_ACTIVIDAD | 1 : N | Se filtra por `INFRA_ILUMINACION` |
+| DIMENSIONES → DATOS_ACTIVIDAD | 1 : N | Identifica a la dimensión 4 (`INFRA_ILUMINACION`); el sistema completa `id_dimension` |
 | UNIDADES → DATOS_ACTIVIDAD | 1 : N | `valor` se expresa en kWh |
 | FUENTES_DATOS → DATOS_ACTIVIDAD | 1 : N | Origen y calidad del dato |
 | **DATOS_ACTIVIDAD → DETALLE_ILUMINACION** ⭐ | **1 : 0..1** | Extensión con las variables propias de la iluminación |
@@ -394,7 +404,7 @@ Devuelve un arreglo de resultados como el anterior, cada uno con su `id_resultad
 | id_actividad | INTEGER PK | No | Identificador del dato de actividad | 41 |
 | id_edificio | INTEGER FK → EDIFICIOS | No | Edificio relevado | 3 |
 | id_periodo | INTEGER FK → PERIODOS | No | Año del relevamiento | 4 |
-| id_dimension | INTEGER FK → DIMENSIONES | No | Dimensión (4 = iluminación) | 4 |
+| id_dimension | INTEGER FK → DIMENSIONES | No | Dimensión (4 = iluminación); la completa el sistema, no se carga en el formulario | 4 |
 | id_unidad | INTEGER FK → UNIDADES | No | Unidad de `valor` | kWh |
 | id_fuente | INTEGER FK → FUENTES_DATOS | No | Origen del dato | 1 |
 | valor | DECIMAL(14,4) | No | Consumo anual estimado | 259.2 (kWh) |
@@ -604,6 +614,8 @@ erDiagram
 
 | Cambio | Motivo |
 |---|---|
+| Se quita el campo *Dimensión* del formulario de carga; la entidad DIMENSIONES se mantiene (versión del 21/10/2026) | La consigna pide que la base central tenga dimensiones. `id_dimension` lo completa el sistema |
+| ABM de UNIVERSIDADES, EDIFICIOS, TIPOS_LUMINARIA y FUENTES_DATOS (versión del 21/10/2026) | Permite mantener los catálogos desde el frontend sin acceso directo a la base |
 | Se quitan SECTORES, `id_sector` y `tipo_actividad` (versión del 21/10/2026) | El relevamiento se registra por edificio, sin desagregar por espacio ni por clase de iluminación |
 | Datos propios de iluminación (`cantidad`, `potencia`, `horas`, tipo de luminaria) movidos de DATOS_ACTIVIDAD a **DETALLE_ILUMINACION** (1:1) | DATOS_ACTIVIDAD es central y compartida por las 15 dimensiones, así que debe quedar genérica (`valor` + `id_unidad`) |
 | Se agregan `dias_anio`, `unidad_tiempo`, `unidad_potencia`, `factor_simultaneidad`, `fecha_relevamiento` y `responsable` | Sin los días de uso no se puede calcular el consumo anual. Los demás campos permiten convertir unidades y dan trazabilidad |

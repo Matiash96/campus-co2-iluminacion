@@ -4,7 +4,7 @@
 **De:** Grupo 4, dimensión "Infraestructura y edificios: análisis de iluminación por edificio"
 **Frontend:** https://campus-co2-iluminacion.vercel.app (hoy funciona con la API simulada)
 
-Este es el listado de endpoints que nuestro frontend consume de la API REST común. Son **24 endpoints**: 9 de consulta de catálogos, 9 de datos (7 de escritura) y 6 para administrar catálogos (ABM). Las rutas son una propuesta: si ustedes las definen distinto, las cambiamos en un solo archivo (`js/config.js`).
+Este es el listado de endpoints que nuestro frontend consume de la API REST común. Son **30 endpoints**: 9 de consulta de catálogos, 9 de datos (7 de escritura) y 12 para administrar catálogos (ABM de universidades, edificios, tipos de luminaria y fuentes de datos). Las rutas son una propuesta: si ustedes las definen distinto, las cambiamos en un solo archivo (`js/config.js`).
 
 ---
 
@@ -54,6 +54,12 @@ Este es el listado de endpoints que nuestro frontend consume de la API REST com�
 | 22 | POST | `/fuentes-datos` | — | Alta de fuente de datos (ABM) |
 | 23 | PUT | `/fuentes-datos/{id_fuente}` | — | Modificación de fuente de datos |
 | 24 | DELETE | `/fuentes-datos/{id_fuente}` | — | Baja de fuente de datos |
+| 25 | POST | `/universidades` | — | Alta de universidad (ABM) |
+| 26 | PUT | `/universidades/{id_universidad}` | — | Modificación de universidad |
+| 27 | DELETE | `/universidades/{id_universidad}` | — | Baja de universidad |
+| 28 | POST | `/edificios` | — | Alta de edificio (ABM) |
+| 29 | PUT | `/edificios/{id_edificio}` | — | Modificación de edificio |
+| 30 | DELETE | `/edificios/{id_edificio}` | — | Baja de edificio |
 
 ⭐ Es propio de nuestra dimensión: la entidad TIPOS_LUMINARIA, junto con DETALLE_ILUMINACION. Les pedimos que las agreguen a la base central. Su estructura está en `Modelo_de_Datos.md`.
 
@@ -61,7 +67,7 @@ Este es el listado de endpoints que nuestro frontend consume de la API REST com�
 
 ---
 
-## 3. Catálogos (solo lectura)
+## 3. Catálogos (consulta)
 
 ### 1. `GET /universidades`
 
@@ -92,6 +98,8 @@ Respuesta `200`:
 [ { "id_dimension": 4, "codigo": "INFRA_ILUMINACION", "nombre": "Infraestructura y edificios", "descripcion": "Análisis de iluminación por edificio" } ]
 ```
 Necesitamos que exista una dimensión con un `codigo` fijo para identificarla. Si eligen otro código, nos lo pasan.
+
+> La dimensión **no es un campo del formulario**. El frontend consulta este endpoint una vez, toma el `id_dimension` y lo agrega solo a los datos de actividad, resultados y proyectos que envía.
 
 ### 5. `GET /unidades`
 
@@ -288,7 +296,7 @@ Respuesta `201` con `id_emision_evitada`. `parametros` y `trazabilidad` son JSON
 
 ## 7. Catálogos administrables (ABM)
 
-Desde la página **Catálogos (ABM)** el usuario puede dar de alta, modificar y dar de baja tipos de luminaria y fuentes de datos. FUENTES_DATOS es central y la comparten todas las dimensiones: si prefieren que solo la cátedra la administre, nos avisan y deshabilitamos esa parte.
+Desde la página **Catálogos (ABM)** el usuario puede dar de alta, modificar y dar de baja universidades, edificios, tipos de luminaria y fuentes de datos. UNIVERSIDADES, EDIFICIOS y FUENTES_DATOS son centrales y las comparten todas las dimensiones: si prefieren que solo la cátedra las administre, nos avisan y deshabilitamos esas pestañas.
 
 | # | Método | Ruta | Respuestas |
 |---|---|---|---|
@@ -298,6 +306,12 @@ Desde la página **Catálogos (ABM)** el usuario puede dar de alta, modificar y 
 | 22 | POST | `/fuentes-datos` | `201` creado · `400` validación · `409` nombre repetido |
 | 23 | PUT | `/fuentes-datos/{id_fuente}` | `200` · `400` · `404` · `409` nombre repetido |
 | 24 | DELETE | `/fuentes-datos/{id_fuente}` | `204` · `404` · `409` en uso por datos de actividad o factores de emisión |
+| 25 | POST | `/universidades` | `201` creado · `400` validación · `409` nombre repetido |
+| 26 | PUT | `/universidades/{id_universidad}` | `200` · `400` · `404` · `409` nombre repetido |
+| 27 | DELETE | `/universidades/{id_universidad}` | `204` · `404` · `409` tiene edificios |
+| 28 | POST | `/edificios` | `201` creado · `400` validación · `409` nombre repetido en la misma universidad |
+| 29 | PUT | `/edificios/{id_edificio}` | `200` · `400` · `404` · `409` nombre repetido en la misma universidad |
+| 30 | DELETE | `/edificios/{id_edificio}` | `204` · `404` · `409` en uso por datos de actividad o proyectos |
 
 Cuerpo de `POST`/`PUT /tipos-luminaria`:
 ```json
@@ -309,18 +323,33 @@ Cuerpo de `POST`/`PUT /fuentes-datos`:
 { "nombre": "Factura EPEC", "tipo": "factura", "referencia": "Tesorería FRC" }
 ```
 
+Cuerpo de `POST`/`PUT /universidades`:
+```json
+{ "nombre": "UTN – Facultad Regional Villa María", "localidad": "Villa María" }
+```
+
+Cuerpo de `POST`/`PUT /edificios`:
+```json
+{ "id_universidad": 1, "nombre": "Edificio Central", "direccion": "Maestro M. López esq. Cruz Roja Argentina" }
+```
+
+`GET /edificios` sin filtro tiene que devolver los edificios de todas las universidades (lo usa la pestaña Edificios); con `?id_universidad=` devuelve solo los de esa universidad (lo usa el formulario de carga).
+
 Validaciones (el frontend ya las aplica):
 
 | Campo | Regla |
 |---|---|
-| `nombre` | Obligatorio, de 3 a 100 caracteres, único dentro del catálogo (sin distinguir mayúsculas) |
+| `nombre` | Obligatorio, de 3 a 100 caracteres, único dentro del catálogo sin distinguir mayúsculas (en edificios, único dentro de la misma universidad) |
+| `localidad` (universidad) | Obligatoria, de 2 a 80 caracteres |
+| `id_universidad` (edificio) | Obligatorio y existente |
+| `direccion` (edificio) | Opcional, hasta 150 caracteres |
 | `tecnologia` | LED, Fluorescente, Fluorescente compacta, Halógena, Descarga, Incandescente u Otra |
 | `potencia_referencia_w` | De 0,5 a 2.000 |
 | `eficiente` | Booleano |
 | `tipo` (fuente) | relevamiento, inventario, documento_tecnico, factura, estimacion o factor_emision |
 | `referencia` | Opcional, hasta 250 caracteres |
 
-**Bajas:** pedimos que la API rechace con `409` la baja de un registro que esté en uso (`{ "message": "No se puede eliminar: está en uso por …" }`), así no quedan datos de actividad ni factores huérfanos.
+**Bajas:** pedimos que la API rechace con `409` la baja de un registro que esté en uso (`{ "message": "No se puede eliminar: está en uso por …" }`), así no quedan edificios, datos de actividad, proyectos ni factores huérfanos.
 
 ---
 

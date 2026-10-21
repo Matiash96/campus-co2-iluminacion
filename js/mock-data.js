@@ -146,7 +146,9 @@ CampusCO2.mock = (function () {
 
   /* Endpoint -> tabla e id */
   const TABLES = {
-    universidades: ["universidades"], edificios: ["edificios"], periodos: ["periodos"], dimensiones: ["dimensiones"],
+    universidades: ["universidades"], edificios: ["edificios"],
+    crearUniversidad: ["universidades", "id_universidad"], actualizarUniversidad: ["universidades", "id_universidad"], eliminarUniversidad: ["universidades", "id_universidad"],
+    crearEdificio: ["edificios", "id_edificio"], actualizarEdificio: ["edificios", "id_edificio"], eliminarEdificio: ["edificios", "id_edificio"], periodos: ["periodos"], dimensiones: ["dimensiones"],
     unidades: ["unidades"], fuentesDatos: ["fuentes_datos"], factoresEmision: ["factores_emision"],
     crearFuente: ["fuentes_datos", "id_fuente"], actualizarFuente: ["fuentes_datos", "id_fuente"], eliminarFuente: ["fuentes_datos", "id_fuente"],
     tiposLuminaria: ["tipos_luminaria"],
@@ -162,6 +164,14 @@ CampusCO2.mock = (function () {
 
   /* Integridad referencial simulada para los catálogos (la API real debería responder 409) */
   function referencias(data, table, id) {
+    if (table === "universidades") {
+      const n = data.edificios.filter((e) => e.id_universidad === id).length;
+      return n ? `${n} edificio(s)` : "";
+    }
+    if (table === "edificios") {
+      const n = data.datos_actividad.filter((a) => a.id_edificio === id).length + data.proyectos_mitigacion.filter((p) => p.id_edificio === id).length;
+      return n ? `${n} dato(s) de actividad o proyecto(s)` : "";
+    }
     if (table === "fuentes_datos") {
       const n = data.datos_actividad.filter((a) => a.id_fuente === id).length + data.factores_emision.filter((f) => f.id_fuente === id).length;
       return n ? `${n} dato(s) de actividad o factor(es) de emisión` : "";
@@ -176,7 +186,9 @@ CampusCO2.mock = (function () {
   /* Nombre único en los catálogos (la API real debería responder 409) */
   function nombreDuplicado(rows, idField, body, id) {
     const nombre = String((body || {}).nombre || "").trim().toLowerCase();
-    return nombre && rows.some((r) => r[idField] !== id && String(r.nombre).trim().toLowerCase() === nombre);
+    // Los edificios se comparan dentro de la misma universidad
+    const mismoAmbito = (r) => idField !== "id_edificio" || String(r.id_universidad) === String((body || {}).id_universidad);
+    return nombre && rows.some((r) => r[idField] !== id && mismoAmbito(r) && String(r.nombre).trim().toLowerCase() === nombre);
   }
 
   function handle(key, method, pathParams = {}, query = {}, body = null) {
@@ -190,7 +202,7 @@ CampusCO2.mock = (function () {
     if (method === "GET") {
       return clone(rows.filter((row) => Object.entries(filters).every(([k, v]) => v === undefined || v === "" || row[k] === undefined || String(row[k]) === String(v))));
     }
-    const esCatalogo = table === "fuentes_datos" || table === "tipos_luminaria";
+    const esCatalogo = ["fuentes_datos", "tipos_luminaria", "universidades", "edificios"].includes(table);
     if (method === "POST") {
       if (esCatalogo && nombreDuplicado(rows, idField, body, null)) throw Object.assign(new Error("Ya existe un registro con ese nombre"), { status: 409 });
       const nextId = rows.reduce((m, r) => Math.max(m, r[idField] || 0), 0) + 1;

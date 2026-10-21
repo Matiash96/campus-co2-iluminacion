@@ -30,7 +30,13 @@ CampusCO2.config = (function () {
     health:              { method: "GET",    path: "/health" },
     // --- Catálogos centrales (solo lectura) ---
     universidades:       { method: "GET",    path: "/universidades" },
+    crearUniversidad:    { method: "POST",   path: "/universidades" },
+    actualizarUniversidad: { method: "PUT",  path: "/universidades/{id_universidad}" },
+    eliminarUniversidad: { method: "DELETE", path: "/universidades/{id_universidad}" },
     edificios:           { method: "GET",    path: "/edificios" },                  // ?id_universidad=
+    crearEdificio:       { method: "POST",   path: "/edificios" },
+    actualizarEdificio:  { method: "PUT",    path: "/edificios/{id_edificio}" },
+    eliminarEdificio:    { method: "DELETE", path: "/edificios/{id_edificio}" },
     periodos:            { method: "GET",    path: "/periodos" },
     dimensiones:         { method: "GET",    path: "/dimensiones" },                // ?codigo=
     unidades:            { method: "GET",    path: "/unidades" },                   // ?magnitud=

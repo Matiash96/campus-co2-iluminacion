@@ -10,18 +10,75 @@
   <link rel="stylesheet" href="css/styles.css">
   <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 </head>
-<body data-page="catalogos" data-title="Catálogos: fuentes de datos y tipos de luminaria">
+<body data-page="catalogos" data-title="Catálogos (ABM)">
   <aside id="app-sidebar"></aside>
   <main class="main">
     <header id="app-topbar"></header>
 
     <div class="tabs" role="tablist">
-      <button class="tab active" role="tab" data-tab="tipos" aria-selected="true">Tipos de luminaria</button>
+      <button class="tab active" role="tab" data-tab="universidades" aria-selected="true">Universidades</button>
+      <button class="tab" role="tab" data-tab="edificios" aria-selected="false">Edificios</button>
+      <button class="tab" role="tab" data-tab="tipos" aria-selected="false">Tipos de luminaria</button>
       <button class="tab" role="tab" data-tab="fuentes" aria-selected="false">Fuentes de datos</button>
     </div>
 
+    <!-- ================= UNIVERSIDADES ================= -->
+    <section class="tab-panel" id="tab-universidades">
+      <div class="grid-abm">
+        <form id="form-univ" class="panel form-panel" novalidate>
+          <input type="hidden" id="u-id">
+          <div class="form-section-title"><span class="step">＋</span><div><h3 id="u-title">Nueva universidad</h3><p>Alta: <code>POST /universidades</code> · Modificación: <code>PUT /universidades/{id}</code></p></div></div>
+          <div class="form-grid one-col">
+            <label class="field"><span class="lbl">Nombre <span class="req">*</span></span><input id="u-nombre" maxlength="100" placeholder="Ej. UTN – Facultad Regional Córdoba"><span class="error-text">Ingresá un nombre de 3 a 100 caracteres.</span></label>
+            <label class="field"><span class="lbl">Localidad <span class="req">*</span></span><input id="u-localidad" maxlength="80" placeholder="Ej. Córdoba"><span class="error-text">Ingresá una localidad de 2 a 80 caracteres.</span></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="u-cancel">Limpiar</button>
+            <button type="submit" class="btn btn-primary" id="u-submit">Guardar universidad</button>
+          </div>
+          <p id="u-msg" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <article class="panel">
+          <div class="panel-head"><div><h3>Universidades</h3><p><code>GET /universidades</code></p></div><span class="badge" id="u-count">–</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Localidad</th><th></th></tr></thead>
+            <tbody id="u-table"><tr><td colspan="4" class="empty">Cargando…</td></tr></tbody>
+          </table></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= EDIFICIOS ================= -->
+    <section class="tab-panel" id="tab-edificios" hidden>
+      <div class="grid-abm">
+        <form id="form-edif" class="panel form-panel" novalidate>
+          <input type="hidden" id="e-id">
+          <div class="form-section-title"><span class="step">＋</span><div><h3 id="e-title">Nuevo edificio</h3><p>Alta: <code>POST /edificios</code> · Modificación: <code>PUT /edificios/{id}</code></p></div></div>
+          <div class="form-grid one-col">
+            <label class="field"><span class="lbl">Universidad <span class="req">*</span></span><select id="e-universidad"></select><span class="error-text">Seleccioná la universidad.</span></label>
+            <label class="field"><span class="lbl">Nombre <span class="req">*</span></span><input id="e-nombre" maxlength="100" placeholder="Ej. Edificio Central"><span class="error-text">Ingresá un nombre de 3 a 100 caracteres.</span></label>
+            <label class="field">Dirección<input id="e-direccion" maxlength="150" placeholder="Ej. Maestro M. López esq. Cruz Roja Argentina"><span class="error-text">Máximo 150 caracteres.</span></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="e-cancel">Limpiar</button>
+            <button type="submit" class="btn btn-primary" id="e-submit">Guardar edificio</button>
+          </div>
+          <p id="e-msg" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <article class="panel">
+          <div class="panel-head"><div><h3>Edificios</h3><p><code>GET /edificios</code></p></div><span class="badge" id="e-count">–</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Universidad</th><th>Dirección</th><th></th></tr></thead>
+            <tbody id="e-table"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody>
+          </table></div>
+        </article>
+      </div>
+    </section>
+
     <!-- ================= TIPOS_LUMINARIA ================= -->
-    <section class="tab-panel" id="tab-tipos">
+    <section class="tab-panel" id="tab-tipos" hidden>
       <div class="grid-abm">
         <form id="form-tipo" class="panel form-panel" novalidate>
           <input type="hidden" id="t-id">
@@ -93,7 +150,7 @@
       </div>
     </section>
 
-    <div class="panel note-panel mt note-inline"><div class="note-icon">i</div><p>FUENTES_DATOS es una entidad central compartida por todas las dimensiones, y TIPOS_LUMINARIA es propia de esta dimensión. La API puede rechazar una baja con <b>409</b> si el registro está en uso, por ejemplo por un dato de actividad o un factor de emisión, o una alta si el nombre ya existe.</p></div>
+    <div class="panel note-panel mt note-inline"><div class="note-icon">i</div><p>UNIVERSIDADES, EDIFICIOS y FUENTES_DATOS son entidades centrales que comparten todas las dimensiones; TIPOS_LUMINARIA es propia de esta dimensión. La API puede rechazar una baja con <b>409</b> si el registro está en uso, por ejemplo por un dato de actividad o un factor de emisión, o una alta si el nombre ya existe.</p></div>
   </main>
 
   <script src="js/config.js"></script>

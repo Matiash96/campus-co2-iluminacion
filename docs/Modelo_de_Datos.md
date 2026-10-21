@@ -6,6 +6,8 @@ El módulo de la dimensión 4 (Infraestructura y edificios: análisis de ilumina
 
 - **Entidades centrales:** las define la cátedra y las comparten las 15 dimensiones. El módulo las consume a través de la API REST común.
 - **Entidades propias de la dimensión 4:** TIPOS_LUMINARIA y DETALLE_ILUMINACION. Guardan los datos que solo necesita el análisis de iluminación.
+- **DIMENSIONES:** DIMENSIONES es la entidad central que separa los datos de los 15 grupos. El módulo siempre usa la dimensión 4 (`INFRA_ILUMINACION`): obtiene su `id_dimension` de la API y lo completa solo en cada envío. No es un campo del formulario de carga.
+- **Catálogos administrables:** UNIVERSIDADES, EDIFICIOS, TIPOS_LUMINARIA y FUENTES_DATOS tienen alta, baja y modificación en la página *Catálogos (ABM)*.
 - **Notación:** PK = clave primaria, FK = clave foránea. Los nombres siguen `snake_case`, igual que el JSON de la API.
 - **Diagrama entidad-relación:** archivo `mapa_entidad_relacion_iluminacion_v3.drawio` (Google Drive y carpeta `docs/` del proyecto).
 
@@ -40,7 +42,7 @@ Las 2 entidades propias se cuelgan de una entidad central: DETALLE_ILUMINACION e
 | UNIVERSIDADES | EDIFICIOS | 1 : N | Edificios de la UTN FRC |
 | EDIFICIOS | DATOS_ACTIVIDAD | 1 : N | El relevamiento se imputa a un edificio |
 | PERIODOS | DATOS_ACTIVIDAD | 1 : N | Cada dato pertenece a un año (periodicidad anual) |
-| DIMENSIONES | DATOS_ACTIVIDAD | 1 : N | Se filtra por el código `INFRA_ILUMINACION` |
+| DIMENSIONES | DATOS_ACTIVIDAD | 1 : N | Identifica a la dimensión 4 (`INFRA_ILUMINACION`); el sistema completa `id_dimension` |
 | UNIDADES | DATOS_ACTIVIDAD | 1 : N | `valor` se expresa en kWh/año |
 | FUENTES_DATOS | DATOS_ACTIVIDAD | 1 : N | Origen y calidad del dato relevado |
 | PERIODOS | FACTORES_EMISION | 1 : N | Un factor de red eléctrica por año |
@@ -92,7 +94,7 @@ Una tabla por entidad, en el orden en que se usan al cargar y calcular. Los tipo
 | id_actividad | INTEGER PK | No | Identificador del dato de actividad | 41 |
 | id_edificio | INTEGER FK → EDIFICIOS | No | Edificio relevado | 3 |
 | id_periodo | INTEGER FK → PERIODOS | No | Año del relevamiento | 4 (2026) |
-| id_dimension | INTEGER FK → DIMENSIONES | No | Dimensión del dato | 4 = iluminación |
+| id_dimension | INTEGER FK → DIMENSIONES | No | Dimensión del dato; lo completa el sistema, no se carga en el formulario | 4 = iluminación |
 | id_unidad | INTEGER FK → UNIDADES | No | Unidad de valor | kWh |
 | id_fuente | INTEGER FK → FUENTES_DATOS | No | Origen del dato | 1 = Relevamiento presencial |
 | valor | DECIMAL(14,4) | No | Consumo anual estimado | 259,2 |

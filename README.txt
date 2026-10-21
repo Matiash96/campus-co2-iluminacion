@@ -11,7 +11,7 @@ Repositorio: https://github.com/Matiash96/campus-co2-iluminacion (privado)
 PÁGINAS
 - index.html ............ Inicio: KPIs del último período y flujo del módulo
 - metodologia.html ...... Modelo de medición: alcance, variables, unidades, fórmulas, relevamiento
-- nosotros.html ......... Descripción del proyecto, cátedra, profesores, curso e integrantes del grupo
+- nosotros.html ......... Descripción del proyecto y datos de la cursada (cátedra, curso y grupo)
 - carga.html ............ MÓDULO DE CARGA: formulario con validaciones (edificio, período,
                           luminaria, potencia + unidad, horas, fuente)
 - calculo.html .......... MÓDULO DE CÁLCULO: aplica el factor de emisión del período,

@@ -9,6 +9,7 @@ CampusCO2.ui = (function () {
   const PAGES = [
     { id: "inicio",        href: "index.html",         icon: "⌂", label: "Inicio" },
     { id: "metodologia",   href: "metodologia.html",   icon: "≡", label: "Modelo de medición" },
+    { id: "nosotros",      href: "nosotros.html",      icon: "☺", label: "Nosotros" },
     { id: "carga",         href: "carga.html",         icon: "＋", label: "Carga de datos", group: "Módulos" },
     { id: "calculo",       href: "calculo.html",       icon: "∑", label: "Cálculo y trazabilidad" },
     { id: "visualizacion", href: "visualizacion.html", icon: "▥", label: "Visualización" },

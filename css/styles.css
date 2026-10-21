@@ -349,3 +349,7 @@ tbody tr.selected td { background: var(--hover); }
 @media (max-width: 1100px) { .grid-abm { grid-template-columns: 1fr; } }
 .grid-abm > * { min-width: 0; }
 .form-section-title p { overflow-wrap: anywhere; }
+
+/* ---------- Nosotros ---------- */
+.about-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.about-kv { margin-top: 12px; gap: 8px 18px; font-size: 13px; }

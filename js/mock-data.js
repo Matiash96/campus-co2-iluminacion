@@ -148,7 +148,9 @@ CampusCO2.mock = (function () {
   const TABLES = {
     universidades: ["universidades"], edificios: ["edificios"], periodos: ["periodos"], dimensiones: ["dimensiones"],
     unidades: ["unidades"], fuentesDatos: ["fuentes_datos"], factoresEmision: ["factores_emision"],
+    crearFuente: ["fuentes_datos", "id_fuente"], actualizarFuente: ["fuentes_datos", "id_fuente"], eliminarFuente: ["fuentes_datos", "id_fuente"],
     tiposLuminaria: ["tipos_luminaria"],
+    crearTipo: ["tipos_luminaria", "id_tipo_luminaria"], actualizarTipo: ["tipos_luminaria", "id_tipo_luminaria"], eliminarTipo: ["tipos_luminaria", "id_tipo_luminaria"],
     listarActividades: ["datos_actividad"], crearActividad: ["datos_actividad", "id_actividad"],
     actualizarActividad: ["datos_actividad", "id_actividad"], eliminarActividad: ["datos_actividad", "id_actividad"],
     listarResultados: ["resultados_emisiones"], crearResultado: ["resultados_emisiones", "id_resultado"],
@@ -157,6 +159,25 @@ CampusCO2.mock = (function () {
   };
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+  /* Integridad referencial simulada para los catálogos (la API real debería responder 409) */
+  function referencias(data, table, id) {
+    if (table === "fuentes_datos") {
+      const n = data.datos_actividad.filter((a) => a.id_fuente === id).length + data.factores_emision.filter((f) => f.id_fuente === id).length;
+      return n ? `${n} dato(s) de actividad o factor(es) de emisión` : "";
+    }
+    if (table === "tipos_luminaria") {
+      const n = data.datos_actividad.filter((a) => (a.detalle_iluminacion || {}).id_tipo_luminaria === id).length;
+      return n ? `${n} dato(s) de actividad` : "";
+    }
+    return "";
+  }
+
+  /* Nombre único en los catálogos (la API real debería responder 409) */
+  function nombreDuplicado(rows, idField, body, id) {
+    const nombre = String((body || {}).nombre || "").trim().toLowerCase();
+    return nombre && rows.some((r) => r[idField] !== id && String(r.nombre).trim().toLowerCase() === nombre);
+  }
 
   function handle(key, method, pathParams = {}, query = {}, body = null) {
     const data = getDb();
@@ -169,7 +190,9 @@ CampusCO2.mock = (function () {
     if (method === "GET") {
       return clone(rows.filter((row) => Object.entries(filters).every(([k, v]) => v === undefined || v === "" || row[k] === undefined || String(row[k]) === String(v))));
     }
+    const esCatalogo = table === "fuentes_datos" || table === "tipos_luminaria";
     if (method === "POST") {
+      if (esCatalogo && nombreDuplicado(rows, idField, body, null)) throw Object.assign(new Error("Ya existe un registro con ese nombre"), { status: 409 });
       const nextId = rows.reduce((m, r) => Math.max(m, r[idField] || 0), 0) + 1;
       const row = Object.assign({}, clone(body), { [idField]: nextId, created_at: new Date().toISOString() });
       rows.push(row); persist();
@@ -179,11 +202,14 @@ CampusCO2.mock = (function () {
     const idx = rows.findIndex((r) => r[idField] === id);
     if (idx < 0) throw Object.assign(new Error("Registro inexistente"), { status: 404 });
     if (method === "PUT") {
+      if (esCatalogo && nombreDuplicado(rows, idField, body, id)) throw Object.assign(new Error("Ya existe un registro con ese nombre"), { status: 409 });
       rows[idx] = Object.assign({}, rows[idx], clone(body), { [idField]: id, updated_at: new Date().toISOString() });
       persist();
       return clone(rows[idx]);
     }
     if (method === "DELETE") {
+      const enUso = referencias(data, table, id);
+      if (enUso) throw Object.assign(new Error(`No se puede eliminar: está en uso por ${enUso}`), { status: 409 });
       rows.splice(idx, 1);
       // Integridad referencial simulada: se eliminan los resultados del dato de actividad
       if (table === "datos_actividad") data.resultados_emisiones = data.resultados_emisiones.filter((r) => r.id_actividad !== id);

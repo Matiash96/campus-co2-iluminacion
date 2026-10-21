@@ -13,6 +13,7 @@ CampusCO2.ui = (function () {
     { id: "calculo",       href: "calculo.html",       icon: "∑", label: "Cálculo y trazabilidad" },
     { id: "visualizacion", href: "visualizacion.html", icon: "▥", label: "Visualización" },
     { id: "mitigacion",    href: "mitigacion.html",    icon: "↘", label: "Mitigación (LED)" },
+    { id: "catalogos",     href: "catalogos.html",     icon: "☰", label: "Catálogos (ABM)", group: "Administración" },
     { id: "configuracion", href: "configuracion.html", icon: "⚙", label: "Configuración API", group: "Integración" }
   ];
 

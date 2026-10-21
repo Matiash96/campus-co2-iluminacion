@@ -35,9 +35,15 @@ CampusCO2.config = (function () {
     dimensiones:         { method: "GET",    path: "/dimensiones" },                // ?codigo=
     unidades:            { method: "GET",    path: "/unidades" },                   // ?magnitud=
     fuentesDatos:        { method: "GET",    path: "/fuentes-datos" },
+    crearFuente:         { method: "POST",   path: "/fuentes-datos" },
+    actualizarFuente:    { method: "PUT",    path: "/fuentes-datos/{id_fuente}" },
+    eliminarFuente:      { method: "DELETE", path: "/fuentes-datos/{id_fuente}" },
     factoresEmision:     { method: "GET",    path: "/factores-emision" },           // ?id_periodo=&categoria=
     // --- Catálogo propio de la dimensión (alojado en la API central) ---
     tiposLuminaria:      { method: "GET",    path: "/tipos-luminaria" },
+    crearTipo:           { method: "POST",   path: "/tipos-luminaria" },
+    actualizarTipo:      { method: "PUT",    path: "/tipos-luminaria/{id_tipo_luminaria}" },
+    eliminarTipo:        { method: "DELETE", path: "/tipos-luminaria/{id_tipo_luminaria}" },
     // --- Datos de actividad ---
     listarActividades:   { method: "GET",    path: "/datos-actividad" },            // ?id_dimension=&id_periodo=&id_edificio=
     crearActividad:      { method: "POST",   path: "/datos-actividad" },

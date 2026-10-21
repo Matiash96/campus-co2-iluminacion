@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogos · Campus CO₂ Iluminación</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="img/icono-64.png">
+  <link rel="apple-touch-icon" href="img/icono-180.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>try{var t=localStorage.getItem("campusco2.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body data-page="catalogos" data-title="Catálogos: fuentes de datos y tipos de luminaria">
+  <aside id="app-sidebar"></aside>
+  <main class="main">
+    <header id="app-topbar"></header>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-tab="tipos" aria-selected="true">Tipos de luminaria</button>
+      <button class="tab" role="tab" data-tab="fuentes" aria-selected="false">Fuentes de datos</button>
+    </div>
+
+    <!-- ================= TIPOS_LUMINARIA ================= -->
+    <section class="tab-panel" id="tab-tipos">
+      <div class="grid-abm">
+        <form id="form-tipo" class="panel form-panel" novalidate>
+          <input type="hidden" id="t-id">
+          <div class="form-section-title"><span class="step">＋</span><div><h3 id="t-title">Nuevo tipo de luminaria</h3><p>Alta: <code>POST /tipos-luminaria</code> · Modificación: <code>PUT /tipos-luminaria/{id}</code></p></div></div>
+          <div class="form-grid one-col">
+            <label class="field"><span class="lbl">Nombre <span class="req">*</span></span><input id="t-nombre" maxlength="100" placeholder="Ej. Tubo LED T8 60 cm"><span class="error-text" id="t-nombre-err">Ingresá un nombre de 3 a 100 caracteres.</span></label>
+            <label class="field"><span class="lbl">Tecnología <span class="req">*</span></span>
+              <select id="t-tecnologia">
+                <option value="">Seleccionar…</option>
+                <option>LED</option><option>Fluorescente</option><option>Fluorescente compacta</option>
+                <option>Halógena</option><option>Descarga</option><option>Incandescente</option><option>Otra</option>
+              </select><span class="error-text">Seleccioná la tecnología.</span>
+            </label>
+            <label class="field"><span class="lbl">Potencia de referencia (W) <span class="req">*</span></span><input id="t-potencia" type="number" min="0.5" max="2000" step="any"><span class="error-text">Ingresá entre 0,5 y 2.000 W.</span><small>Se propone al cargar un dato de actividad con este tipo.</small></label>
+            <label class="check"><input type="checkbox" id="t-eficiente"> Tecnología eficiente <small>(cuenta para el % LED / eficiente y no aparece como oportunidad de recambio)</small></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="t-cancel">Limpiar</button>
+            <button type="submit" class="btn btn-primary" id="t-submit">Guardar tipo</button>
+          </div>
+          <p id="t-msg" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <article class="panel">
+          <div class="panel-head"><div><h3>Tipos de luminaria</h3><p><code>GET /tipos-luminaria</code></p></div><span class="badge" id="t-count">–</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Tecnología</th><th class="num">Potencia</th><th>Eficiente</th><th></th></tr></thead>
+            <tbody id="t-table"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody>
+          </table></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= FUENTES_DATOS ================= -->
+    <section class="tab-panel" id="tab-fuentes" hidden>
+      <div class="grid-abm">
+        <form id="form-fuente" class="panel form-panel" novalidate>
+          <input type="hidden" id="f-id">
+          <div class="form-section-title"><span class="step">＋</span><div><h3 id="f-title">Nueva fuente de datos</h3><p>Alta: <code>POST /fuentes-datos</code> · Modificación: <code>PUT /fuentes-datos/{id}</code></p></div></div>
+          <div class="form-grid one-col">
+            <label class="field"><span class="lbl">Nombre <span class="req">*</span></span><input id="f-nombre" maxlength="100" placeholder="Ej. Factura EPEC"><span class="error-text" id="f-nombre-err">Ingresá un nombre de 3 a 100 caracteres.</span></label>
+            <label class="field"><span class="lbl">Tipo <span class="req">*</span></span>
+              <select id="f-tipo">
+                <option value="">Seleccionar…</option>
+                <option value="relevamiento">Relevamiento</option>
+                <option value="inventario">Inventario</option>
+                <option value="documento_tecnico">Documento técnico</option>
+                <option value="factura">Factura</option>
+                <option value="estimacion">Estimación</option>
+                <option value="factor_emision">Factor de emisión</option>
+              </select><span class="error-text">Seleccioná el tipo de fuente.</span>
+            </label>
+            <label class="field">Referencia<input id="f-referencia" maxlength="250" placeholder="Ej. Dpto. Mantenimiento / planilla 2026"><span class="error-text">Máximo 250 caracteres.</span><small>Dónde está el dato o quién lo provee.</small></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="f-cancel">Limpiar</button>
+            <button type="submit" class="btn btn-primary" id="f-submit">Guardar fuente</button>
+          </div>
+          <p id="f-msg" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <article class="panel">
+          <div class="panel-head"><div><h3>Fuentes de datos</h3><p><code>GET /fuentes-datos</code></p></div><span class="badge" id="f-count">–</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Referencia</th><th></th></tr></thead>
+            <tbody id="f-table"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody>
+          </table></div>
+        </article>
+      </div>
+    </section>
+
+    <div class="panel note-panel mt note-inline"><div class="note-icon">i</div><p>FUENTES_DATOS es una entidad central compartida por todas las dimensiones, y TIPOS_LUMINARIA es propia de esta dimensión. La API puede rechazar una baja con <b>409</b> si el registro está en uso, por ejemplo por un dato de actividad o un factor de emisión, o una alta si el nombre ya existe.</p></div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/calculo.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/catalogos.js"></script>
+</body>
+</html>

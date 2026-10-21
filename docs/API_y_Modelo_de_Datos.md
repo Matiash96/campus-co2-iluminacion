@@ -100,6 +100,12 @@ flowchart LR
 | 17 | POST | `/proyectos-mitigacion` | Registrar un proyecto | PROYECTOS_MITIGACION |
 | 18 | GET | `/emisiones-evitadas?id_proyecto=&id_periodo=` | KPI de emisiones evitadas | EMISIONES_EVITADAS |
 | 19 | POST | `/emisiones-evitadas` | Enviar las emisiones evitadas calculadas | EMISIONES_EVITADAS |
+| 20 | POST | `/tipos-luminaria` | ABM: alta de tipo de luminaria | TIPOS_LUMINARIA ⭐ |
+| 21 | PUT | `/tipos-luminaria/{id_tipo_luminaria}` | ABM: modificación | TIPOS_LUMINARIA ⭐ |
+| 22 | DELETE | `/tipos-luminaria/{id_tipo_luminaria}` | ABM: baja (`409` si está en uso) | TIPOS_LUMINARIA ⭐ |
+| 23 | POST | `/fuentes-datos` | ABM: alta de fuente de datos | FUENTES_DATOS |
+| 24 | PUT | `/fuentes-datos/{id_fuente}` | ABM: modificación | FUENTES_DATOS |
+| 25 | DELETE | `/fuentes-datos/{id_fuente}` | ABM: baja (`409` si está en uso) | FUENTES_DATOS |
 
 ⭐ Catálogo propio de la dimensión 4. Pedimos que la cátedra los aloje en la base central, o que indique cómo modelarlos con sus entidades genéricas.
 

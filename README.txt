@@ -19,6 +19,7 @@ PÁGINAS
                           temporal, comparación interanual, distribución por tecnología y
                           por tipo de luminaria, kWh y kgCO2e por luminaria, ranking, CSV
 - mitigacion.html ....... Proyectos de recambio a LED y emisiones evitadas
+- catalogos.html ........ ABM de tipos de luminaria y fuentes de datos (alta, baja y modificación)
 - configuracion.html .... INTEGRACIÓN CON LA API: URL base, token, modo demo, prueba de conexión
 
 Todas las páginas tienen un botón para cambiar entre modo claro y oscuro (se recuerda

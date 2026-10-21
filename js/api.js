@@ -76,6 +76,7 @@ CampusCO2.api = (function () {
 
   /* --- Caché simple para catálogos (duran toda la página) --- */
   const cache = {};
+  const invalidar = (name) => { delete cache[name]; };
   function cached(name, fn) {
     if (!cache[name]) cache[name] = fn().catch((e) => { delete cache[name]; throw e; });
     return cache[name];
@@ -101,6 +102,9 @@ CampusCO2.api = (function () {
     getDimension: idDim,
     getUnidades: () => cached("unidades", () => request("unidades")),
     getFuentes: () => cached("fuentes", () => request("fuentesDatos")),
+    crearFuente: (payload) => request("crearFuente", { body: payload }).finally(() => invalidar("fuentes")),
+    actualizarFuente: (id_fuente, payload) => request("actualizarFuente", { pathParams: { id_fuente }, body: payload }).finally(() => invalidar("fuentes")),
+    eliminarFuente: (id_fuente) => request("eliminarFuente", { pathParams: { id_fuente } }).finally(() => invalidar("fuentes")),
     getFactores: (id_periodo) => request("factoresEmision", { query: { id_periodo, categoria: cfg().categoriaFactor } }),
     async getFactorPeriodo(id_periodo) {
       const lista = await this.getFactores(id_periodo);
@@ -111,6 +115,9 @@ CampusCO2.api = (function () {
 
     // Catálogo de la dimensión
     getTiposLuminaria: () => cached("tipos", () => request("tiposLuminaria")),
+    crearTipo: (payload) => request("crearTipo", { body: payload }).finally(() => invalidar("tipos")),
+    actualizarTipo: (id_tipo_luminaria, payload) => request("actualizarTipo", { pathParams: { id_tipo_luminaria }, body: payload }).finally(() => invalidar("tipos")),
+    eliminarTipo: (id_tipo_luminaria) => request("eliminarTipo", { pathParams: { id_tipo_luminaria } }).finally(() => invalidar("tipos")),
 
     // Datos de actividad
     async listarActividades(filtros = {}) {

@@ -4,7 +4,7 @@
 **De:** Grupo 4, dimensión "Infraestructura y edificios: análisis de iluminación por edificio"
 **Frontend:** https://campus-co2-iluminacion.vercel.app (hoy funciona con la API simulada)
 
-Este es el listado de endpoints que nuestro frontend consume de la API REST común. Son **18 endpoints**: 9 de consulta de catálogos y 9 de datos, de los cuales 7 son de escritura. Las rutas son una propuesta: si ustedes las definen distinto, las cambiamos en un solo archivo (`js/config.js`).
+Este es el listado de endpoints que nuestro frontend consume de la API REST común. Son **24 endpoints**: 9 de consulta de catálogos, 9 de datos (7 de escritura) y 6 para administrar catálogos (ABM). Las rutas son una propuesta: si ustedes las definen distinto, las cambiamos en un solo archivo (`js/config.js`).
 
 ---
 
@@ -48,6 +48,12 @@ Este es el listado de endpoints que nuestro frontend consume de la API REST com�
 | 16 | POST | `/proyectos-mitigacion` | — | Registrar un proyecto |
 | 17 | GET | `/emisiones-evitadas` | — | Indicador de emisiones evitadas |
 | 18 | POST | `/emisiones-evitadas` | — | Enviar las emisiones evitadas calculadas |
+| 19 | POST | `/tipos-luminaria` | — | Alta de tipo de luminaria (ABM) ⭐ |
+| 20 | PUT | `/tipos-luminaria/{id_tipo_luminaria}` | — | Modificación de tipo de luminaria ⭐ |
+| 21 | DELETE | `/tipos-luminaria/{id_tipo_luminaria}` | — | Baja de tipo de luminaria ⭐ |
+| 22 | POST | `/fuentes-datos` | — | Alta de fuente de datos (ABM) |
+| 23 | PUT | `/fuentes-datos/{id_fuente}` | — | Modificación de fuente de datos |
+| 24 | DELETE | `/fuentes-datos/{id_fuente}` | — | Baja de fuente de datos |
 
 ⭐ Es propio de nuestra dimensión: la entidad TIPOS_LUMINARIA, junto con DETALLE_ILUMINACION. Les pedimos que las agreguen a la base central. Su estructura está en `Modelo_de_Datos.md`.
 
@@ -280,7 +286,45 @@ Respuesta `201` con `id_emision_evitada`. `parametros` y `trazabilidad` son JSON
 
 ---
 
-## 7. Lo que necesitamos de la cátedra
+## 7. Catálogos administrables (ABM)
+
+Desde la página **Catálogos (ABM)** el usuario puede dar de alta, modificar y dar de baja tipos de luminaria y fuentes de datos. FUENTES_DATOS es central y la comparten todas las dimensiones: si prefieren que solo la cátedra la administre, nos avisan y deshabilitamos esa parte.
+
+| # | Método | Ruta | Respuestas |
+|---|---|---|---|
+| 19 | POST | `/tipos-luminaria` | `201` creado · `400` validación · `409` nombre repetido |
+| 20 | PUT | `/tipos-luminaria/{id_tipo_luminaria}` | `200` · `400` · `404` · `409` nombre repetido |
+| 21 | DELETE | `/tipos-luminaria/{id_tipo_luminaria}` | `204` · `404` · `409` en uso por datos de actividad |
+| 22 | POST | `/fuentes-datos` | `201` creado · `400` validación · `409` nombre repetido |
+| 23 | PUT | `/fuentes-datos/{id_fuente}` | `200` · `400` · `404` · `409` nombre repetido |
+| 24 | DELETE | `/fuentes-datos/{id_fuente}` | `204` · `404` · `409` en uso por datos de actividad o factores de emisión |
+
+Cuerpo de `POST`/`PUT /tipos-luminaria`:
+```json
+{ "nombre": "Tubo LED T8 60 cm", "tecnologia": "LED", "potencia_referencia_w": 9, "eficiente": true }
+```
+
+Cuerpo de `POST`/`PUT /fuentes-datos`:
+```json
+{ "nombre": "Factura EPEC", "tipo": "factura", "referencia": "Tesorería FRC" }
+```
+
+Validaciones (el frontend ya las aplica):
+
+| Campo | Regla |
+|---|---|
+| `nombre` | Obligatorio, de 3 a 100 caracteres, único dentro del catálogo (sin distinguir mayúsculas) |
+| `tecnologia` | LED, Fluorescente, Fluorescente compacta, Halógena, Descarga, Incandescente u Otra |
+| `potencia_referencia_w` | De 0,5 a 2.000 |
+| `eficiente` | Booleano |
+| `tipo` (fuente) | relevamiento, inventario, documento_tecnico, factura, estimacion o factor_emision |
+| `referencia` | Opcional, hasta 250 caracteres |
+
+**Bajas:** pedimos que la API rechace con `409` la baja de un registro que esté en uso (`{ "message": "No se puede eliminar: está en uso por …" }`), así no quedan datos de actividad ni factores huérfanos.
+
+---
+
+## 8. Lo que necesitamos de la cátedra
 
 1. La URL base de la API y, si usan autenticación, cómo obtener el token.
 2. Que confirmen las rutas o nos pasen las suyas.

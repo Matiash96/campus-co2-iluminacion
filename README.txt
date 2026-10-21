@@ -4,6 +4,9 @@ Análisis de iluminación por edificio · UTN FRC · Cátedra Green Software
 
 Sitio multipágina (HTML + CSS + JavaScript, sin frameworks ni build).
 
+Publicado en: https://campus-co2-iluminacion.vercel.app
+(se actualiza solo con cada push a la rama main de GitHub)
+
 PÁGINAS
 - index.html ............ Inicio: KPIs del último período y flujo del módulo
 - metodologia.html ...... Modelo de medición: alcance, variables, unidades, fórmulas, relevamiento

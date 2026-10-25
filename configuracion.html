@@ -15,7 +15,20 @@
   <main class="main">
     <header id="app-topbar"></header>
 
-    <article class="panel">
+    <div class="section-heading">
+      <div><h2>Endpoints principales</h2><p>Consulta del factor de emisión, envío del cálculo y consulta de los datos para graficar.</p></div>
+    </div>
+    <div class="ep-main" id="ep-main"></div>
+
+    <article class="panel mt">
+      <div class="panel-head"><div><h3>Todos los endpoints de la API</h3><p>Rutas relativas a la URL base de la API REST común, agrupadas por uso. Detalle completo en <code>docs/Endpoints_para_la_catedra.md</code>.</p></div><span class="badge" id="ep-count">–</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Método</th><th>Ruta y parámetros</th><th>Uso en el módulo</th></tr></thead>
+        <tbody id="ep-table"></tbody>
+      </table></div>
+    </article>
+
+    <article class="panel mt">
       <div class="panel-head">
         <div><h3>Datos de demostración</h3><p>El sistema funciona con datos simulados en el navegador. Podés exportarlos o volver a los datos de ejemplo.</p></div>
         <div class="row-actions">
@@ -23,14 +36,6 @@
           <button class="btn btn-danger btn-sm" id="btn-reset">Restablecer datos de ejemplo</button>
         </div>
       </div>
-    </article>
-
-    <article class="panel mt">
-      <div class="panel-head"><div><h3>Endpoints de la API</h3><p>Rutas que usa el módulo, relativas a la URL base de la API REST. Detalle completo en <code>docs/Endpoints_para_la_catedra.md</code>.</p></div><span class="badge" id="ep-count">–</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Método</th><th>Ruta</th><th>Uso en el módulo</th></tr></thead>
-        <tbody id="ep-table"></tbody>
-      </table></div>
     </article>
   </main>
 

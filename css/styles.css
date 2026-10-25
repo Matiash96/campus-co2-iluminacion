@@ -353,3 +353,19 @@ tbody tr.selected td { background: var(--hover); }
 /* ---------- Nosotros ---------- */
 .about-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 .about-kv { margin-top: 12px; gap: 8px 18px; font-size: 13px; }
+
+/* ---------- Configuración: endpoints ---------- */
+.ep-main { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.ep-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ep-card .ep-num { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.ep-card h3 { margin: 0; font-size: 15px; }
+.ep-card p { margin: 0; font-size: 12px; color: var(--text-2); }
+.ep-line { display: flex; gap: 8px; align-items: flex-start; }
+.ep-line .badge { flex-shrink: 0; }
+.ep-line code { flex: 1; min-width: 0; }
+.ep-line code { overflow-wrap: anywhere; font-size: 12px; color: var(--ink); }
+.ep-card .json-box { max-height: 220px; font-size: 11px; }
+.ep-card details summary { cursor: pointer; font-size: 12px; color: var(--blue-ink); font-weight: 650; }
+.ep-group td { background: var(--th-bg); font-weight: 700; color: var(--ink); font-size: 12px; }
+#ep-table code { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .ep-main { grid-template-columns: 1fr; } }

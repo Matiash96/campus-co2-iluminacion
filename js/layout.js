@@ -8,14 +8,13 @@ window.CampusCO2 = window.CampusCO2 || {};
 CampusCO2.ui = (function () {
   const PAGES = [
     { id: "inicio",        href: "index.html",         icon: "⌂", label: "Inicio" },
-    { id: "metodologia",   href: "metodologia.html",   icon: "≡", label: "Modelo de medición" },
     { id: "nosotros",      href: "nosotros.html",      icon: "☺", label: "Nosotros" },
     { id: "carga",         href: "carga.html",         icon: "＋", label: "Carga de datos", group: "Módulos" },
     { id: "calculo",       href: "calculo.html",       icon: "∑", label: "Cálculo y trazabilidad" },
     { id: "visualizacion", href: "visualizacion.html", icon: "▥", label: "Visualización" },
     { id: "mitigacion",    href: "mitigacion.html",    icon: "↘", label: "Mitigación (LED)" },
     { id: "catalogos",     href: "catalogos.html",     icon: "☰", label: "Catálogos (ABM)", group: "Administración" },
-    { id: "configuracion", href: "configuracion.html", icon: "⚙", label: "Configuración API", group: "Integración" }
+    { id: "configuracion", href: "configuracion.html", icon: "⚙", label: "Configuración", group: "Integración" }
   ];
 
   const $ = (id) => document.getElementById(id);

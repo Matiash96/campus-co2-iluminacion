@@ -10,7 +10,6 @@ Repositorio: https://github.com/Matiash96/campus-co2-iluminacion (privado)
 
 PÁGINAS
 - index.html ............ Inicio: KPIs del último período y flujo del módulo
-- metodologia.html ...... Modelo de medición: alcance, variables, unidades, fórmulas, relevamiento
 - nosotros.html ......... Descripción del proyecto y datos de la cursada (cátedra, curso y grupo)
 - carga.html ............ MÓDULO DE CARGA: formulario con validaciones (edificio, período,
                           luminaria, potencia + unidad, horas, fuente)
@@ -21,7 +20,7 @@ PÁGINAS
                           por tipo de luminaria, kWh y kgCO2e por luminaria, ranking, CSV
 - mitigacion.html ....... Proyectos de recambio a LED y emisiones evitadas
 - catalogos.html ........ ABM de universidades, edificios, tipos de luminaria y fuentes de datos
-- configuracion.html .... INTEGRACIÓN CON LA API: URL base, token, modo demo, prueba de conexión
+- configuracion.html .... Listado de endpoints de la API y datos de demostración (exportar / restablecer)
 
 Todas las páginas tienen un botón para cambiar entre modo claro y oscuro (se recuerda
 en el navegador; sin elección, sigue el tema del sistema).
@@ -47,11 +46,11 @@ Opción B (recomendada): servir la carpeta, por ejemplo:
 Los gráficos usan Chart.js 4.4.1 desde un CDN: hace falta conexión a internet.
 
 MODO DEMOSTRACIÓN vs. API REAL
-- Por defecto funciona en "modo demostración": las respuestas de la API se simulan en el
-  navegador y los datos persisten en localStorage. Se reinician desde Configuración API.
-- Cuando la cátedra publique la API: ir a "Configuración API", elegir "API central",
-  cargar la URL base (y el token si corresponde), probar la conexión y guardar.
-  Si las rutas difieren, editar ENDPOINTS en js/config.js.
+- Para la presentación el sistema funciona siempre en "modo demostración": las respuestas
+  de la API se simulan en el navegador y los datos persisten en localStorage. Se exportan o
+  reinician desde la página Configuración, que también lista todos los endpoints.
+- Para conectar más adelante la API real: en js/config.js poner useMock = false (en load())
+  y la URL base en DEFAULTS.baseUrl. Si las rutas difieren, editar ENDPOINTS.
 
 IMPORTANTE
 - Los edificios, cantidades, potencias y factores de emisión del modo demostración son

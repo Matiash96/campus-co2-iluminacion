@@ -5,7 +5,7 @@
      describe CÓMO consumir la API REST común.
    - Cuando la cátedra publique la URL y las rutas definitivas,
      alcanza con modificar DEFAULTS.baseUrl y/o ENDPOINTS
-     (o cargarlos desde la página "Configuración API").
+     y forzar useMock = false en load().
    - Mientras tanto, useMock = true simula las respuestas
      (ver js/mock-data.js) para poder presentar el módulo.
    ========================================================= */
@@ -68,7 +68,8 @@ CampusCO2.config = (function () {
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      return Object.assign({}, DEFAULTS, saved);
+      // Para la presentación el sistema queda siempre en modo demostración (API simulada)
+      return Object.assign({}, DEFAULTS, saved, { useMock: true });
     } catch (e) {
       return Object.assign({}, DEFAULTS);
     }

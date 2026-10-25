@@ -1,70 +1,47 @@
-/* Configuración de la conexión con la API central */
+/* Configuración: listado de endpoints y datos de demostración */
 document.addEventListener("DOMContentLoaded", () => {
   const { $, esc, toast } = CampusCO2.ui;
   const config = CampusCO2.config;
-  const FIELDS = ["baseUrl", "token", "idUniversidad", "codigoDimension", "categoriaFactor", "timeoutMs"];
 
-  function fill() {
-    const c = config.get();
-    $("useMock").value = String(c.useMock);
-    FIELDS.forEach((f) => ($(f).value = c[f]));
-    renderEndpoints();
-  }
+  /* Para qué usa el módulo cada endpoint de js/config.js */
+  const USOS = {
+    health: "Chequeo de estado (opcional, no se usa)",
+    universidades: "Consultar universidades",
+    crearUniversidad: "ABM: alta de universidad",
+    actualizarUniversidad: "ABM: modificación de universidad",
+    eliminarUniversidad: "ABM: baja de universidad",
+    edificios: "Consultar edificios",
+    crearEdificio: "ABM: alta de edificio",
+    actualizarEdificio: "ABM: modificación de edificio",
+    eliminarEdificio: "ABM: baja de edificio",
+    periodos: "Consultar períodos anuales",
+    dimensiones: "Obtener el id de la dimensión 4",
+    unidades: "Consultar unidades (kWh)",
+    fuentesDatos: "Consultar fuentes de datos",
+    crearFuente: "ABM: alta de fuente de datos",
+    actualizarFuente: "ABM: modificación de fuente de datos",
+    eliminarFuente: "ABM: baja de fuente de datos",
+    factoresEmision: "Consultar el factor de emisión del año",
+    tiposLuminaria: "Consultar tipos de luminaria",
+    crearTipo: "ABM: alta de tipo de luminaria",
+    actualizarTipo: "ABM: modificación de tipo de luminaria",
+    eliminarTipo: "ABM: baja de tipo de luminaria",
+    listarActividades: "Consultar datos de actividad (tablas y gráficos)",
+    crearActividad: "Enviar un dato de actividad",
+    actualizarActividad: "Corregir un dato de actividad",
+    eliminarActividad: "Borrar un dato de actividad",
+    listarResultados: "Consultar resultados (tablas y gráficos)",
+    crearResultado: "Enviar el cálculo con su trazabilidad",
+    listarProyectos: "Consultar proyectos de mitigación",
+    crearProyecto: "Registrar un proyecto de mitigación",
+    listarEvitadas: "Consultar emisiones evitadas",
+    crearEvitada: "Enviar las emisiones evitadas"
+  };
 
-  function renderEndpoints() {
-    const base = $("baseUrl").value.replace(/\/$/, "");
-    $("ep-table").innerHTML = Object.entries(config.ENDPOINTS).map(([k, ep]) =>
-      `<tr><td>${esc(k)}</td><td><span class="badge ${ep.method === "GET" ? "" : ep.method === "DELETE" ? "err" : "ok"}">${ep.method}</span></td><td><code>${esc(base + ep.path)}</code></td></tr>`).join("");
-  }
-  $("baseUrl").addEventListener("input", renderEndpoints);
-
-  function read() {
-    return {
-      useMock: $("useMock").value === "true",
-      baseUrl: $("baseUrl").value.trim(),
-      token: $("token").value.trim(),
-      idUniversidad: Number($("idUniversidad").value) || 1,
-      codigoDimension: $("codigoDimension").value.trim(),
-      categoriaFactor: $("categoriaFactor").value.trim(),
-      timeoutMs: Number($("timeoutMs").value) || 15000
-    };
-  }
-
-  function validUrl() {
-    const ok = /^https?:\/\/[^\s]+$/i.test($("baseUrl").value.trim());
-    $("baseUrl").closest(".field").classList.toggle("invalid", !ok);
-    return ok;
-  }
-
-  $("cfg-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (!validUrl()) return;
-    config.save(read());
-    toast("Configuración guardada", "ok");
-    setTimeout(() => location.reload(), 500);
-  });
-
-  $("btn-defaults").addEventListener("click", () => { config.reset(); fill(); toast("Valores por defecto restaurados"); });
-
-  $("btn-test").addEventListener("click", async () => {
-    if (!validUrl()) return;
-    const prev = config.get();
-    config.save(read());
-    const msg = $("cfg-message");
-    msg.className = "form-message";
-    msg.textContent = "Probando…";
-    try {
-      const t0 = performance.now();
-      const [dims, periodos] = await Promise.all([CampusCO2.api.request("dimensiones"), CampusCO2.api.request("periodos")]);
-      msg.className = "form-message ok";
-      msg.textContent = `Conexión correcta (${Math.round(performance.now() - t0)} ms): ${dims.length} dimensiones y ${periodos.length} períodos recibidos.`;
-    } catch (err) {
-      msg.className = "form-message err";
-      msg.textContent = `Falló la conexión: ${err.message}${err.status ? ` (HTTP ${err.status})` : ""}.`;
-    } finally {
-      config.save(prev); // la prueba no persiste cambios hasta "Guardar"
-    }
-  });
+  const entradas = Object.entries(config.ENDPOINTS).filter(([k]) => k !== "health");
+  $("ep-count").textContent = `${entradas.length} endpoints`;
+  $("ep-table").innerHTML = entradas.map(([k, ep]) =>
+    `<tr><td><span class="badge ${ep.method === "GET" ? "" : ep.method === "DELETE" ? "err" : "ok"}">${ep.method}</span></td><td><code>${esc(ep.path)}</code></td><td>${esc(USOS[k] || k)}</td></tr>`).join("");
 
   $("btn-export").addEventListener("click", () => {
     const a = document.createElement("a");
@@ -74,10 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   $("btn-reset").addEventListener("click", () => {
-    if (!confirm("¿Restablecer los datos de demostración? Se perderán los registros cargados en modo simulado.")) return;
+    if (!confirm("¿Restablecer los datos de demostración? Se perderán los registros cargados.")) return;
     CampusCO2.mock.reset();
     toast("Datos de ejemplo restablecidos", "ok");
   });
-
-  fill();
 });

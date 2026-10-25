@@ -5,7 +5,7 @@
    de la API de la cátedra para poder presentar el módulo
    sin servidor. Los datos se guardan en localStorage para que
    persistan entre páginas. Todos los valores son ILUSTRATIVOS.
-   Se desactiva desde "Configuración API" (useMock = false).
+   Para conectar la API real: useMock = false en js/config.js.
    ========================================================= */
 window.CampusCO2 = window.CampusCO2 || {};
 

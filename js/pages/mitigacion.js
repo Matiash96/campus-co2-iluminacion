@@ -34,9 +34,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* Reemplazo sugerido por tecnología */
   function sugerido(tipo) {
+    // Tubos -> tubo LED; el resto -> plafón LED de potencia similar (o el primer tipo eficiente)
     const t = (tipo.nombre || "").toLowerCase();
-    const id = t.includes("tubo") ? 2 : t.includes("reflector") ? 8 : 4;
-    return ctx.tipoPorId[id] || ctx.tipos.find((x) => x.eficiente);
+    const eficientes = ctx.tipos.filter((x) => x.eficiente);
+    const tuboLed = eficientes.find((x) => x.nombre.toLowerCase().includes("tubo"));
+    const plafon = eficientes.find((x) => x.nombre.toLowerCase().includes("plafón"));
+    return (t.includes("tubo") ? tuboLed : plafon) || eficientes[0];
   }
 
   function renderOportunidades() {

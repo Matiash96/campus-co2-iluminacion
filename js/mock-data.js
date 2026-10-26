@@ -4,25 +4,34 @@
    NO es una API propia: imita las respuestas que se esperan
    de la API de la cátedra para poder presentar el módulo
    sin servidor. Los datos se guardan en localStorage para que
-   persistan entre páginas. Todos los valores son ILUSTRATIVOS.
+   persistan entre páginas. Edificios y cantidades salen del
+   relevamiento del grupo; horas, días y el proyecto de mitigación
+   son supuestos de prueba.
    Para conectar la API real: useMock = false en js/config.js.
    ========================================================= */
 window.CampusCO2 = window.CampusCO2 || {};
 
 CampusCO2.mock = (function () {
-  const DB_KEY = "campusco2.iluminacion.mockdb.v2";
+  const DB_KEY = "campusco2.iluminacion.mockdb.v3";
 
   function seed() {
     const universidades = [{ id_universidad: 1, nombre: "UTN – Facultad Regional Córdoba", localidad: "Córdoba" }];
 
+    // Edificios y cantidades del relevamiento del grupo (planilla de relevamiento)
     const edificios = [
-      { id_edificio: 1, id_universidad: 1, nombre: "Edificio Central (ejemplo)" },
-      { id_edificio: 2, id_universidad: 1, nombre: "Edificio de Aulas (ejemplo)" },
-      { id_edificio: 3, id_universidad: 1, nombre: "Biblioteca (ejemplo)" },
-      { id_edificio: 4, id_universidad: 1, nombre: "Laboratorios (ejemplo)" }
+      { id_edificio: 1, id_universidad: 1, nombre: "Edif. Central" },
+      { id_edificio: 2, id_universidad: 1, nombre: "Edif. Ing. Irico - Dr. Sananez" },
+      { id_edificio: 3, id_universidad: 1, nombre: "Edif. Ing. Soro" },
+      { id_edificio: 4, id_universidad: 1, nombre: "Edif. Ing. Maders" },
+      { id_edificio: 5, id_universidad: 1, nombre: "Edif. Ing. Gallardo" },
+      { id_edificio: 6, id_universidad: 1, nombre: "Edif. Ing. Salcedo" },
+      { id_edificio: 7, id_universidad: 1, nombre: "Edif. Ing. Inchaurrondo" },
+      { id_edificio: 8, id_universidad: 1, nombre: "Edif. Área Informática y Física" },
+      { id_edificio: 9, id_universidad: 1, nombre: "Edif. Sueldo" }
     ];
 
-    const periodos = [2023, 2024, 2025, 2026].map((anio, i) => ({
+    const ANIOS = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    const periodos = ANIOS.map((anio, i) => ({
       id_periodo: i + 1, anio, fecha_inicio: `${anio}-01-01`, fecha_fin: `${anio}-12-31`, estado: anio === 2026 ? "abierto" : "cerrado"
     }));
 
@@ -48,88 +57,96 @@ CampusCO2.mock = (function () {
     ];
 
     const fuentes_datos = [
-      { id_fuente: 1, nombre: "Relevamiento presencial", tipo: "relevamiento", referencia: "Recorrido por el edificio – planilla de campo" },
+      { id_fuente: 1, nombre: "Relevamiento presencial", tipo: "relevamiento", referencia: "Recorrido por cada edificio – planilla de relevamiento del grupo" },
       { id_fuente: 2, nombre: "Inventario de Mantenimiento", tipo: "inventario", referencia: "Dpto. Mantenimiento / Infraestructura FRC" },
       { id_fuente: 3, nombre: "Ficha técnica del fabricante", tipo: "documento_tecnico", referencia: "Datasheet de la luminaria" },
       { id_fuente: 4, nombre: "Estimación por catálogo", tipo: "estimacion", referencia: "Potencia típica de catálogo comercial" },
-      { id_fuente: 5, nombre: "Factor de red – valor de demostración", tipo: "factor_emision", referencia: "Reemplazar por el FE oficial de la red argentina (Secretaría de Energía / CAMMESA)" }
+      { id_fuente: 5, nombre: "Factores de emisión de GEI – Argentina (SNI-GEI-AR)", tipo: "factor_emision", referencia: "https://inventariogei.ambiente.gob.ar/files/Factores_de_Emision_SNIGEIAR_para_HC_2025.pdf" }
     ];
 
+    // Catálogo: los datos de prueba usan solo el tubo LED (id 1). El resto queda para el ABM y Mitigación.
     const tipos_luminaria = [
-      { id_tipo_luminaria: 1, nombre: "Tubo fluorescente T8 120 cm", tecnologia: "Fluorescente", potencia_referencia_w: 36, eficiente: false },
-      { id_tipo_luminaria: 2, nombre: "Tubo LED T8 120 cm", tecnologia: "LED", potencia_referencia_w: 18, eficiente: true },
-      { id_tipo_luminaria: 3, nombre: "Panel LED 60×60", tecnologia: "LED", potencia_referencia_w: 40, eficiente: true },
-      { id_tipo_luminaria: 4, nombre: "Plafón LED circular", tecnologia: "LED", potencia_referencia_w: 18, eficiente: true },
-      { id_tipo_luminaria: 5, nombre: "Lámpara bajo consumo (LFC)", tecnologia: "Fluorescente compacta", potencia_referencia_w: 20, eficiente: false },
-      { id_tipo_luminaria: 6, nombre: "Lámpara halógena dicroica", tecnologia: "Halógena", potencia_referencia_w: 50, eficiente: false },
-      { id_tipo_luminaria: 7, nombre: "Reflector halogenuro metálico", tecnologia: "Descarga", potencia_referencia_w: 150, eficiente: false },
-      { id_tipo_luminaria: 8, nombre: "Reflector LED", tecnologia: "LED", potencia_referencia_w: 50, eficiente: true }
+      { id_tipo_luminaria: 1, nombre: "Tubo LED 120cm Luz Neutra", tecnologia: "LED", potencia_referencia_w: 9, eficiente: true },
+      { id_tipo_luminaria: 2, nombre: "Plafón circular LED mediano", tecnologia: "LED", potencia_referencia_w: 18, eficiente: true },
+      { id_tipo_luminaria: 3, nombre: "Plafón circular LED grande", tecnologia: "LED", potencia_referencia_w: 24, eficiente: true },
+      { id_tipo_luminaria: 4, nombre: "Plafón cuadrado LED mediano", tecnologia: "LED", potencia_referencia_w: 18, eficiente: true },
+      { id_tipo_luminaria: 5, nombre: "Plafón cuadrado LED grande", tecnologia: "LED", potencia_referencia_w: 24, eficiente: true },
+      { id_tipo_luminaria: 6, nombre: "Tubo fluorescente T8 120 cm", tecnologia: "Fluorescente", potencia_referencia_w: 36, eficiente: false },
+      { id_tipo_luminaria: 7, nombre: "Lámpara bajo consumo (LFC)", tecnologia: "Fluorescente compacta", potencia_referencia_w: 20, eficiente: false },
+      { id_tipo_luminaria: 8, nombre: "Lámpara halógena dicroica", tecnologia: "Halógena", potencia_referencia_w: 50, eficiente: false }
     ];
 
-    // Factores ilustrativos: la API real debe devolver el FE oficial por año.
-    const factores_emision = [
-      { id_factor: 1, id_periodo: 1, anio: 2023, categoria: "electricidad_red", valor: 0.300, unidad: "kgCO2e/kWh", id_fuente: 5, fuente_nombre: "Factor de red – valor de demostración", alcance: 2 },
-      { id_factor: 2, id_periodo: 2, anio: 2024, categoria: "electricidad_red", valor: 0.290, unidad: "kgCO2e/kWh", id_fuente: 5, fuente_nombre: "Factor de red – valor de demostración", alcance: 2 },
-      { id_factor: 3, id_periodo: 3, anio: 2025, categoria: "electricidad_red", valor: 0.283, unidad: "kgCO2e/kWh", id_fuente: 5, fuente_nombre: "Factor de red – valor de demostración", alcance: 2 },
-      { id_factor: 4, id_periodo: 4, anio: 2026, categoria: "electricidad_red", valor: 0.283, unidad: "tCO2e/MWh", id_fuente: 5, fuente_nombre: "Factor de red – valor de demostración", alcance: 2 }
-    ];
+    // Factores de la red eléctrica argentina (planilla del grupo, fuente SNI-GEI-AR).
+    // 2023-2026 no tienen valor publicado: se usa el último disponible (2022 = 0,283).
+    // 2026 se expresa en tCO2e/MWh (mismo valor) para mostrar la conversión de unidades.
+    const FE = { 2020: 0.275, 2021: 0.292, 2022: 0.283, 2023: 0.283, 2024: 0.283, 2025: 0.283, 2026: 0.283 };
+    const factores_emision = periodos.map((p) => ({
+      id_factor: p.id_periodo, id_periodo: p.id_periodo, anio: p.anio, categoria: "electricidad_red",
+      valor: FE[p.anio], unidad: p.anio === 2026 ? "tCO2e/MWh" : "kgCO2e/kWh", id_fuente: 5,
+      fuente_nombre: p.anio <= 2022 ? "SNI-GEI-AR – factor de la red eléctrica argentina"
+        : "SNI-GEI-AR – último valor publicado (2022), sin dato oficial para el año",
+      alcance: 2
+    }));
 
-    // Configuración por grupo de luminarias para generar una evolución creíble 2023-2026
-    // e = edificio · viejo/nuevo = tipo de luminaria antes/después del recambio · cambio = año del recambio
+    // Datos de prueba: cantidades del relevamiento; horas y días son SUPUESTOS de prueba.
+    // Horas por día según turnos de uso de cada edificio. Días por año según la actividad presencial:
+    // 2020 actividad mínima (ASPO), 2021 presencialidad parcial, 2022 en adelante calendario completo.
     const plan = [
-      { g: 1, e: 1, viejo: 1, nuevo: 2, cant: 96, h: 10, d: 200, cambio: 2025 },
-      { g: 2, e: 1, viejo: 5, nuevo: 4, cant: 40, h: 14, d: 240, cambio: 2024 },
-      { g: 3, e: 1, viejo: 1, nuevo: 2, cant: 30, h: 9, d: 230, cambio: 2026 },
-      { g: 4, e: 1, viejo: 7, nuevo: 8, cant: 12, h: 12, d: 365, cambio: 2026 },
-      { g: 5, e: 2, viejo: 1, nuevo: 2, cant: 120, h: 11, d: 200, cambio: 2026, crece: 4 },
-      { g: 6, e: 2, viejo: 5, nuevo: 5, cant: 24, h: 14, d: 240, cambio: 9999 },
-      { g: 7, e: 3, viejo: 1, nuevo: 3, cant: 60, h: 12, d: 250, cambio: 2024, cantNueva: 30 },
-      { g: 8, e: 3, viejo: 6, nuevo: 6, cant: 10, h: 3, d: 200, cambio: 9999 },
-      { g: 9, e: 4, viejo: 1, nuevo: 2, cant: 48, h: 12, d: 220, cambio: 2025 },
-      { g: 10, e: 4, viejo: 1, nuevo: 1, cant: 32, h: 8, d: 200, cambio: 9999 }
+      { e: 1, cant: 1100, h: 14 },
+      { e: 2, cant: 140, h: 8 },
+      { e: 3, cant: 504, h: 12 },
+      { e: 4, cant: 291, h: 10 },
+      { e: 5, cant: 344, h: 10 },
+      { e: 6, cant: 94, h: 8 },
+      { e: 7, cant: 168, h: 10 },
+      { e: 8, cant: 478, h: 12 },
+      { e: 9, cant: 30, h: 6 }
     ];
+    const DIAS = { 2020: 60, 2021: 120, 2022: 190, 2023: 200, 2024: 200, 2025: 205, 2026: 200 };
+    const tubo = tipos_luminaria[0];
 
     const datos_actividad = [];
     const resultados_emisiones = [];
     let idAct = 1, idRes = 1;
     periodos.forEach((p) => {
+      const factor = factores_emision.find((f) => f.id_periodo === p.id_periodo);
       plan.forEach((c) => {
-        const usaNuevo = p.anio >= c.cambio;
-        const tipo = tipos_luminaria.find((t) => t.id_tipo_luminaria === (usaNuevo ? c.nuevo : c.viejo));
-        const cantidad = usaNuevo && c.cantNueva ? c.cantNueva : c.cant + (p.anio - 2023) * (c.crece || 0);
+        const edificio = edificios.find((x) => x.id_edificio === c.e);
         const detalle = {
-          id_tipo_luminaria: tipo.id_tipo_luminaria,
-          cantidad, potencia_unitaria: tipo.potencia_referencia_w, unidad_potencia: "W",
-          horas_uso: c.h, unidad_tiempo: "h/día", dias_anio: c.d, factor_simultaneidad: 100,
-          fecha_relevamiento: `${p.anio}-05-15`, responsable: "Grupo 4 – Iluminación", observaciones: "Dato de demostración"
+          id_tipo_luminaria: tubo.id_tipo_luminaria,
+          cantidad: c.cant, potencia_unitaria: tubo.potencia_referencia_w, unidad_potencia: "W",
+          horas_uso: c.h, unidad_tiempo: "h/día", dias_anio: DIAS[p.anio], factor_simultaneidad: 100,
+          fecha_relevamiento: `${p.anio}-05-15`, responsable: "Grupo 4 – Iluminación",
+          observaciones: "Cantidad del relevamiento; horas y días supuestos para datos de prueba"
         };
         const consumo = CampusCO2.calculo.calcularConsumo(detalle);
         const act = {
           id_actividad: idAct++, id_edificio: c.e, id_periodo: p.id_periodo, id_dimension: 4,
-          id_unidad: 4, id_fuente: usaNuevo ? 1 : 2, valor: consumo.kwh, descripcion: `${tipo.nombre} – ${edificios.find((x) => x.id_edificio === c.e).nombre}`,
+          id_unidad: 4, id_fuente: 1, valor: consumo.kwh, descripcion: `${tubo.nombre} – ${edificio.nombre}`,
           detalle_iluminacion: detalle, created_at: `${p.anio}-05-15T12:00:00Z`
         };
         datos_actividad.push(act);
-        // En 2026 se dejan dos registros sin calcular para mostrar el flujo del módulo de cálculo
-        if (!(p.anio === 2026 && (c.g === 4 || c.g === 10))) {
-          const factor = factores_emision.find((f) => f.id_periodo === p.id_periodo);
-          const res = CampusCO2.calculo.calcularEmisiones(act, factor, { edificio: c.e, periodo: p.anio, tipo_luminaria: tipo.nombre });
-          res.id_resultado = idRes++;
-          res.id_dimension = 4;
-          res.id_periodo = p.id_periodo;
-          res.id_edificio = c.e;
-          res.fecha_calculo = `${p.anio}-06-01T12:00:00Z`;
-          resultados_emisiones.push(res);
-        }
+        const res = CampusCO2.calculo.calcularEmisiones(act, factor, { edificio: edificio.nombre, periodo: p.anio, tipo_luminaria: tubo.nombre });
+        res.id_resultado = idRes++;
+        res.id_dimension = 4;
+        res.id_periodo = p.id_periodo;
+        res.id_edificio = c.e;
+        res.fecha_calculo = `${p.anio}-06-01T12:00:00Z`;
+        resultados_emisiones.push(res);
       });
     });
 
+    // Proyecto de prueba: recambio de tubos fluorescentes por tubos LED en el Edificio Central.
+    // Emisiones evitadas de cada año respecto del escenario sin recambio (fluorescente 36 W).
     const proyectos_mitigacion = [
-      { id_proyecto: 1, id_edificio: 1, id_dimension: 4, nombre: "Recambio LED – Aulas planta baja", descripcion: "Reemplazo de tubos fluorescentes T8 36 W por tubos LED 18 W.", tipo_medida: "Recambio a LED", fecha_inicio: "2025-02-01", estado: "Implementado" }
+      { id_proyecto: 1, id_edificio: 1, id_dimension: 4, nombre: "Recambio a tubos LED – Edif. Central", descripcion: "Reemplazo de 1.100 tubos fluorescentes T8 de 36 W por tubos LED de 120 cm de 9 W (proyecto de prueba).", tipo_medida: "Recambio a LED", fecha_inicio: "2019-03-01", estado: "Implementado" }
     ];
-    const emisiones_evitadas = [
-      { id_emision_evitada: 1, id_proyecto: 1, id_periodo: 3, id_factor: 3, consumo_base_kwh: 6912, consumo_mejorado_kwh: 3456, kg_co2e_evitados: 978.048, parametros: { cantidad_base: 96, potencia_base: 36, cantidad_nueva: 96, potencia_nueva: 18, horas_uso: 10, unidad_tiempo: "h/día", dias_anio: 200 } }
-    ];
+    const emisiones_evitadas = periodos.map((p, i) => {
+      const factor = factores_emision.find((f) => f.id_periodo === p.id_periodo);
+      const params = { cantidad_base: 1100, potencia_base: 36, cantidad_nueva: 1100, potencia_nueva: 9, horas_uso: 14, unidad_tiempo: "h/día", dias_anio: DIAS[p.anio] };
+      const ev = CampusCO2.calculo.calcularEvitadas(params, factor);
+      return { id_emision_evitada: i + 1, id_proyecto: 1, id_periodo: p.id_periodo, id_factor: factor.id_factor, consumo_base_kwh: ev.consumo_base_kwh, consumo_mejorado_kwh: ev.consumo_mejorado_kwh, kg_co2e_evitados: ev.kg_co2e_evitados, parametros: params, trazabilidad: ev.trazabilidad };
+    });
 
     return { universidades, edificios, periodos, dimensiones, unidades, fuentes_datos, tipos_luminaria, factores_emision, datos_actividad, resultados_emisiones, proyectos_mitigacion, emisiones_evitadas };
   }

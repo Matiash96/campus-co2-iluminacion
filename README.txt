@@ -53,5 +53,8 @@ MODO DEMOSTRACIÓN vs. API REAL
   y la URL base en DEFAULTS.baseUrl. Si las rutas difieren, editar ENDPOINTS.
 
 IMPORTANTE
-- Los edificios, cantidades, potencias y factores de emisión del modo demostración son
-  ILUSTRATIVOS, no datos oficiales de la Facultad. El factor oficial lo debe proveer la API central.
+- Datos de prueba (2020-2026): 9 edificios y 3.149 tubos LED 120 cm de 9 W, según el
+  relevamiento del grupo. Factores de emisión del SNI-GEI-AR (2020: 0,275; 2021: 0,292;
+  2022: 0,283 kgCO2e/kWh); de 2023 a 2026 se usa el último publicado (0,283).
+- Las horas por día de cada edificio, los días por año (2020: 60, 2021: 120, 2022: 190,
+  2023-2024: 200, 2025: 205, 2026: 200) y el proyecto de mitigación son SUPUESTOS de prueba.

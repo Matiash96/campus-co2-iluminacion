@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       factor = await api.getFactorPeriodo(id_periodo);
       const n = calc.normalizarFactor(factor);
+      $("factor-box").classList.remove("loading");
       $("factor-box").innerHTML = `
         <strong style="font-size:22px">${fmt(factor.valor, 3)} <em style="font-size:12px;font-style:normal;color:var(--muted)">${esc(factor.unidad)}</em></strong>
         <dl class="kv mt"><dt>Normalizado</dt><dd>${fmt(n.valor_kg_kwh, 4)} kgCO₂e/kWh</dd>
@@ -65,6 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("btn-all").textContent = pend.length ? `Calcular y enviar ${pend.length} pendiente(s)` : "Sin pendientes";
     const totKg = lista.reduce((s, f) => s + (f.kg || 0), 0);
     const totKwh = lista.reduce((s, f) => s + f.kwh, 0);
+    $("estado-box").classList.remove("loading");
     $("estado-box").innerHTML = `
       <strong style="font-size:22px">${lista.length - pend.length} / ${lista.length}</strong> <small class="required-note">registros calculados</small>
       <dl class="kv mt"><dt>Consumo</dt><dd>${fmt(totKwh, 0)} kWh</dd><dt>Emisiones</dt><dd>${showCO2(totKg)}</dd></dl>`;
